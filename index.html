@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Worship Lyrics</title>
+<style>
+/* VOICE: calm, dim living-room console; the TV stage is the hero
+   IDEA: a church projection booth — preview monitor, cue list, transport
+   PICTURE: live 16:9 stage preview at top of the Live tab
+   COLOUR and TYPE: near-black console, warm candle-gold accent; system sans
+   LAYOUT: library + session sidebar, Live / Edit tabs in main */
+:root{color-scheme:dark;--bg:#111318;--panel:#1a1d24;--panel2:#22262f;--line:#2e333d;--ink:#ebe8e2;--mute:#9aa0ab;--acc:#f2c14e;--rec:#e5484d;--ok:#46a758}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;min-height:38px}
+button:hover{border-color:#4a505c}
+button.pri{background:var(--acc);color:#1a1400;border-color:var(--acc);font-weight:600}
+button.pri kbd{background:rgba(0,0,0,.12);border-color:rgba(0,0,0,.25);color:#1a1400}
+button:disabled{opacity:.45;cursor:default}
+button.recb.on{background:var(--rec);border-color:var(--rec);color:#fff}
+button.tog.on{border-color:var(--ok);color:#bfe9c6}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+input[type=text],input[type=url],input[type=search],input[type=date],select,textarea{background:#0e1014;border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;font-size:15px}
+textarea.small{min-height:120px}
+textarea{min-height:380px;resize:vertical;line-height:1.5}
+label{display:block;font-size:13px;color:var(--mute);margin:12px 0 5px}
+a{color:var(--acc)}
+.top{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.top h1{font-size:18px;margin:0 auto 0 0;font-weight:650}
+.top h1 span{color:var(--acc)}
+.app{display:grid;grid-template-columns:290px minmax(0,1fr);height:calc(100% - 59px)}
+aside{border-right:1px solid var(--line);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:20px}
+main{overflow:auto;padding:14px 18px 48px}
+h2{font-size:13px;color:var(--mute);font-weight:600;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+h2 button{min-height:30px;padding:2px 10px;font-size:13px}
+.list{display:flex;flex-direction:column;gap:2px}
+.item{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;cursor:pointer}
+.item:hover{background:var(--panel)}
+.item.on{background:var(--panel2);box-shadow:inset 3px 0 0 var(--acc)}
+.item .nm{flex:1}
+.item b{display:block;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item small{color:var(--mute);font-size:12px}
+.item button{min-height:28px;padding:0 6px;font-size:12px}
+#set .item button{opacity:.55}#set .item:hover button,#set .item button:focus-visible{opacity:1}
+#set .item b{white-space:normal;font-size:13px;line-height:1.25}
+.num{color:var(--mute);width:18px;text-align:right;font-size:12px}
+.empty{color:var(--mute);font-size:13px;padding:6px 8px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;align-items:center}
+.tabs button.on{background:var(--ink);color:#111;border-color:var(--ink)}
+.tabs .songname{margin-left:8px;font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stagewrap{display:flex;gap:12px;align-items:flex-start}
+.stagewrap>#preview{flex:1;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+.stagewrap:fullscreen{background:#000;display:block}
+.stagewrap:fullscreen>#preview{position:fixed;inset:0;width:100vw;height:100vh;aspect-ratio:auto;border-radius:0;box-shadow:none}
+.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.time{font-variant-numeric:tabular-nums;color:var(--mute);min-width:96px;white-space:nowrap}
+.status{font-size:13px;color:var(--mute)}
+.status.warn{color:#f0a35e}
+.nudge{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--mute);white-space:nowrap}
+.nudge button{min-height:30px;padding:0 9px}
+.banner{padding:10px 12px;border-radius:8px;margin:8px 0;font-size:14px;display:none}
+.banner.show{display:block}
+.banner.rec{background:rgba(229,72,77,.15);border:1px solid var(--rec)}
+.banner.info{background:rgba(242,193,78,.1);border:1px solid rgba(242,193,78,.4)}
+.media{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.media audio{width:100%;margin-top:4px}
+.clock{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.clock .big{font-size:26px;font-variant-numeric:tabular-nums;min-width:90px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.chips button{min-height:32px;padding:2px 10px;font-size:13px}
+.chips button b{color:var(--acc);margin-right:4px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+.cue{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px;max-height:520px;overflow:auto}
+.blk{margin:4px 0 10px}
+.bh{font-size:12px;color:var(--mute);padding:2px 8px;font-weight:600}
+.bh b{color:var(--acc);margin-right:6px}
+.li{padding:5px 10px;border-radius:6px;cursor:pointer;font-size:15px}
+.li:hover{background:var(--panel2)}
+.li.on{background:var(--acc);color:#1a1400;font-weight:600}
+.keys{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px}
+.keys table{width:100%;border-collapse:collapse}
+.keys td{padding:3px 0;vertical-align:top}
+.keys td:first-child{white-space:nowrap;padding-right:10px}
+kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;font:12px/1.6 ui-monospace,Menlo,monospace;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 12px}
+.edgrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;align-items:start}
+.struct{width:100%;border-collapse:collapse;font-size:14px;margin-top:4px}
+.struct td,.struct th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+.struct th{color:var(--mute);font-weight:500;font-size:12px}
+.struct select{padding:4px 6px;font-size:14px}
+.struct td.c{color:var(--acc);font-weight:700;width:44px}
+.err{color:#f0a35e;font-size:13px;margin-top:4px;min-height:18px}
+.radios{display:flex;flex-wrap:wrap;gap:6px}
+.radios label{margin:0;display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:var(--ink);font-size:14px;cursor:pointer}
+.radios input{accent-color:var(--acc)}
+.sw{display:flex;flex-wrap:wrap;gap:8px}
+.sw button{width:64px;height:40px;min-height:0;padding:0;border-radius:8px;border:2px solid transparent;font-size:11px;color:#fff;text-shadow:0 1px 2px #000}
+.sw button.on{border-color:var(--acc)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hint{font-size:13px;color:var(--mute);margin-top:4px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#2a2f39;border:1px solid var(--line);padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+.modal.show{display:flex}
+.modal .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:18px 22px}
+.modal h3{margin:14px 0 6px;font-size:15px}
+.modal ol{padding-left:20px;margin:6px 0}
+.modal code{background:#0e1014;padding:1px 5px;border-radius:4px;font-size:13px;overflow-wrap:anywhere}
+#live.slide-mode .transport,#live.slide-mode .media,#live.slide-mode .chips,#live.slide-mode .keys{display:none}
+#live.slide-mode .cols{grid-template-columns:minmax(0,1fr)}
+.slideed{padding:10px 12px}.slideed h3{margin:4px 0 4px;font-size:15px}
+.ic{display:inline-block;min-width:22px;text-align:center;color:var(--acc);font-size:12px;font-weight:700}
+.kbdind{font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--mute);white-space:nowrap;margin-left:auto}
+.kbdind.typing{border-color:#f0a35e;color:#f0a35e}
+#spotLink{margin-left:10px!important}
+.upnext{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:0 0 12px;font-size:14px}
+.upnext b{color:var(--acc);font-weight:600}
+.upnext .clk{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--mute)}
+.item a.sp{font-size:12px;text-decoration:none;padding:0 4px}
+.sessgrid{display:grid;grid-template-columns:minmax(0,1fr) 140px;gap:6px;margin:6px 0}
+@media(max-width:1100px){.cols{grid-template-columns:minmax(0,1fr)}.edgrid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:800px){.app{grid-template-columns:minmax(0,1fr);height:auto}aside{border-right:0;border-bottom:1px solid var(--line)}.grid2{grid-template-columns:minmax(0,1fr)}}
+</style>
+<style id="stagecss">
+.stage{position:relative;container-type:size;aspect-ratio:16/9;overflow:hidden;color:#fff;font-family:"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;background:#000;user-select:none}
+.stage .bg{position:absolute;inset:0;overflow:hidden;background:var(--base,#05070d)}
+.stage .bg i{position:absolute;display:block;will-change:transform,opacity}
+.stage .bg.noanim i,.stage .bg.noanim{animation:none!important}
+.stage .bg.img{background-size:cover;background-position:center}
+.stage .bg.img.anim{animation:zoom 70s ease-in-out infinite alternate}
+@keyframes zoom{from{transform:scale(1)}to{transform:scale(1.1)}}
+/* still */
+.stage .sc-still{background:radial-gradient(ellipse at 25% 20%,color-mix(in srgb,var(--c1) 45%,transparent),transparent 60%),radial-gradient(ellipse at 85% 85%,color-mix(in srgb,var(--c2) 40%,transparent),transparent 60%),var(--base)}
+/* aurora: soft drifting light */
+.stage .sc-aurora i{width:90%;height:100%;background:radial-gradient(closest-side,var(--k) 0%,color-mix(in srgb,var(--k) 35%,transparent) 50%,transparent 100%);opacity:.75;mix-blend-mode:screen}
+.stage .sc-aurora i:nth-child(1){--k:var(--c1);left:-20%;top:-25%;animation:au1 38s ease-in-out infinite alternate}
+.stage .sc-aurora i:nth-child(2){--k:var(--c2);right:-25%;top:5%;animation:au2 47s ease-in-out infinite alternate}
+.stage .sc-aurora i:nth-child(3){--k:var(--c3);left:15%;bottom:-40%;animation:au3 56s ease-in-out infinite alternate}
+@keyframes au1{to{transform:translate(28%,22%) scale(1.25)}}
+@keyframes au2{to{transform:translate(-32%,14%) scale(.85)}}
+@keyframes au3{to{transform:translate(12%,-26%) scale(1.2)}}
+/* rays: slow light from above */
+.stage .sc-rays{background:radial-gradient(ellipse at 50% -10%,color-mix(in srgb,var(--c2) 50%,transparent),transparent 60%),linear-gradient(to bottom,var(--base),color-mix(in srgb,var(--c1) 18%,var(--base)))}
+.stage .sc-rays i:nth-child(1){left:50%;top:-12%;width:220cqw;height:220cqw;margin:-110cqw 0 0 -110cqw;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--c3) 32%,transparent) 0deg 3deg,transparent 4.5deg 12deg);-webkit-mask:radial-gradient(closest-side,#000 0%,rgba(0,0,0,.7) 30%,transparent 100%);mask:radial-gradient(closest-side,#000 0%,rgba(0,0,0,.7) 30%,transparent 100%);opacity:.8;animation:spin 160s linear infinite}
+.stage .sc-rays i:nth-child(2){left:15%;top:-30%;width:70%;height:75%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c3) 45%,transparent),transparent);animation:pulse 11s ease-in-out infinite alternate}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{from{opacity:.35}to{opacity:.8}}
+/* bokeh: floating soft circles */
+.stage .sc-bokeh{background:radial-gradient(ellipse at 50% 120%,color-mix(in srgb,var(--c1) 35%,transparent),transparent 60%),var(--base)}
+.stage .sc-bokeh i{top:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,var(--k) 0%,color-mix(in srgb,var(--k) 40%,transparent) 45%,transparent 70%);opacity:0;animation:rise var(--d) linear infinite;animation-delay:var(--dl)}
+@keyframes rise{0%{transform:translateY(10cqh);opacity:0}15%{opacity:var(--o)}85%{opacity:var(--o)}100%{transform:translateY(-125cqh);opacity:0}}
+/* stars: twinkling sky */
+.stage .sc-stars{background:radial-gradient(ellipse at 70% 110%,color-mix(in srgb,var(--c1) 40%,transparent),transparent 60%),radial-gradient(ellipse at 10% -10%,color-mix(in srgb,var(--c2) 22%,transparent),transparent 55%),var(--base)}
+.stage .sc-stars i{inset:0;animation:twinkle var(--d) ease-in-out infinite alternate}
+.stage .sc-stars i:last-child{inset:-10%;animation:drift2 90s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.25}to{opacity:1}}
+@keyframes drift2{to{transform:translate(4%,-3%)}}
+/* waves: gentle rolling light */
+.stage .sc-waves{background:linear-gradient(to bottom,var(--base) 30%,color-mix(in srgb,var(--c1) 30%,var(--base)))}
+.stage .sc-waves i{left:0;width:200%;background-repeat:repeat-x;background-size:50% 100%;mix-blend-mode:screen}
+.stage .sc-waves i:nth-child(1){bottom:-8%;height:60%;opacity:.75;background-image:radial-gradient(ellipse 30% 55% at 25% 100%,var(--c1),transparent 70%),radial-gradient(ellipse 30% 45% at 75% 100%,var(--c2),transparent 70%);animation:slide 48s linear infinite}
+.stage .sc-waves i:nth-child(2){bottom:-14%;height:50%;opacity:.6;background-image:radial-gradient(ellipse 28% 60% at 40% 100%,var(--c3),transparent 70%),radial-gradient(ellipse 22% 50% at 90% 100%,var(--c1),transparent 70%);animation:slide 66s linear infinite reverse}
+.stage .sc-waves i:nth-child(3){top:-20%;height:60%;opacity:.35;background-image:radial-gradient(ellipse 35% 50% at 30% 0%,var(--c2),transparent 70%),radial-gradient(ellipse 25% 40% at 80% 0%,var(--c3),transparent 70%);animation:slide 90s linear infinite}
+@keyframes slide{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.stage .bg,.stage .bg i{animation:none!important}.stage .sc-bokeh i{opacity:.3;top:50%}}
+.stage .kick{font-size:2.6cqw;margin:0 0 1.6cqh;opacity:.85;font-weight:600;letter-spacing:.03em}
+.stage .who{font-size:3.2cqw!important;margin-top:3cqh!important;opacity:.95!important;font-weight:600}
+.stage .slide h1{font-size:calc(6.4cqw * var(--fit,1))}
+.stage .req{list-style:none;padding:0;margin:3.5cqh auto 0;text-align:left;max-width:80cqw;font-size:calc(min(3.6cqw, 58cqh / (var(--n,4) * 1.55)) * var(--fit,1));line-height:1.3;text-shadow:0 .2cqw .8cqw rgba(0,0,0,.6)}
+.stage .req li{margin:.8cqh 0;padding-left:1.3em;position:relative}
+.stage .req li::before{content:'';position:absolute;left:.25em;top:.5em;width:.4em;height:.4em;border-radius:50%;background:#ffce54}
+.bgprev{width:100%;max-width:340px;border-radius:8px;margin-top:8px}
+.stage .veil{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,.32),rgba(0,0,0,.5))}
+.stage .ct{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:8cqh 7cqw;gap:2.4cqh;text-align:center}
+.stage .ln{font-size:calc(min(5cqw, 66cqh / (var(--n,4) * 1.3)) * var(--fs,1) * var(--fit,1));font-weight:600;line-height:1.22;opacity:.55;transition:opacity .3s;text-shadow:0 .25cqw 1cqw rgba(0,0,0,.7);text-wrap:balance;max-width:100%}
+.stage .ln.done{opacity:.35}
+.stage .ln.cur{opacity:1}
+.stage .ln.cur span{background:linear-gradient(transparent 64%,rgba(255,206,84,.55) 64%);padding:0 .15em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.stage.ink-dark .ln{color:#1d1813;text-shadow:none}
+.stage.ink-dark .ln.cur span{background:linear-gradient(transparent 64%,rgba(214,146,30,.45) 64%)}
+.stage .sec{position:absolute;top:4cqh;left:4cqw;font-size:1.9cqw;opacity:.72;font-weight:600;letter-spacing:.02em}
+.stage .nxt{position:absolute;bottom:4cqh;right:4cqw;font-size:1.9cqw;opacity:.8}
+.stage .ttl h1{font-size:calc(6.4cqw * var(--fs,1));margin:0;font-weight:700;line-height:1.1;text-shadow:0 .3cqw 1.2cqw rgba(0,0,0,.6);text-wrap:balance}
+.stage .ttl p{font-size:2.6cqw;margin:1.6cqh 0 0;opacity:.8}
+.stage.ink-dark .ttl h1{text-shadow:none;color:#1d1813}.stage.ink-dark .ttl p,.stage.ink-dark .sec,.stage.ink-dark .nxt{color:#3a3128}
+.stage .badge{position:absolute;top:4cqh;right:4cqw;font-size:1.5cqw;background:rgba(229,72,77,.9);padding:.3cqw 1cqw;border-radius:1cqw;font-weight:700}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Worship <span>Lyrics</span> <small style="font-size:12px;color:var(--mute);font-weight:400" title="App version">v1.7.0</small></h1>
+  <button id="btnTV" title="Open a separate window to drag onto the TV">Open TV window</button>
+  <button id="btnFS" title="Full screen on this screen (F)">Present here <kbd>F</kbd></button>
+  <button id="btnHelp">Help <kbd>?</kbd></button>
+</header>
+<div class="app">
+  <aside>
+    <section>
+      <h2>Song library <button id="btnNew" class="pri">+ New song</button></h2>
+      <input type="search" id="q" placeholder="Search title or artist" aria-label="Search songs">
+      <div class="list" id="lib" style="margin-top:8px"></div>
+    </section>
+    <section>
+      <h2>Worship session <span style="font-weight:400">next item <kbd>N</kbd></span></h2>
+      <div class="row"><select id="sessSel" style="flex:1" aria-label="Choose session"></select><button id="sessNew">+ New</button></div>
+      <div class="sessgrid"><input type="text" id="sessName" aria-label="Group name" placeholder="Home Family Caregroup"><input type="date" id="sessDate" aria-label="Date"></div>
+      <div class="list" id="set"></div>
+      <select id="sessAdd" style="margin-top:6px" aria-label="Add to session"><option value="">+ Add to session…</option><option value="song">Current song</option><option value="welcome">Welcome screen</option><option value="prayer">Prayer</option><option value="sharing">Sharing</option><option value="requests">Prayer requests</option></select>
+      <label style="display:flex;gap:8px;align-items:flex-start;color:var(--ink);margin:8px 0 0;font-size:13px"><input type="checkbox" id="hf" style="margin-top:3px"> Hands-free: start the audio when a song comes up, and move on to the next item when it ends</label>
+      <div class="row" style="margin-top:6px"><button id="sessPractice" title="Copy the song list with Spotify links">Copy practice list</button><button id="sessDel">Delete session</button></div>
+      <p class="hint" id="sessFile"></p>
+    </section>
+    <section>
+      <h2>Default background</h2>
+      <div style="display:grid;gap:6px"><select id="dScene" aria-label="Default scene"></select><select id="dPal" aria-label="Default colors"></select></div>
+      <div class="stage bgprev" id="dBgPrev"></div>
+      <div class="row" style="margin-top:8px">
+        <label style="margin:0;display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="dAnim"> Animate backgrounds</label>
+        <button id="dImg">Upload image…</button><input type="file" id="fBg" accept="image/*" hidden>
+      </div>
+      <p class="hint">Used by every song set to “Default”. With Random, each song opens with a different scene and colors.</p>
+    </section>
+    <section>
+      <h2>Where songs are saved</h2>
+      <div id="fsStatus" class="hint" style="margin:0 0 8px"></div>
+      <div class="row" id="fsBtns"></div>
+      <p class="hint" id="fsHint"></p>
+      <h2 style="margin-top:16px">Backup &amp; share</h2>
+      <div class="row">
+        <button id="btnExport">Export library</button>
+        <button id="btnImport">Import</button>
+        <input type="file" id="fImport" accept=".json,application/json" hidden>
+      </div>
+    </section>
+  </aside>
+  <main>
+    <div class="tabs">
+      <button id="tabLive" class="on">Live</button>
+      <button id="tabEdit">Edit song</button>
+      <span class="songname" id="songName"></span><span id="kbdInd" class="kbdind"></span><a id="spotLink" href="#" target="_blank" rel="noopener" style="white-space:nowrap;margin-left:auto">♫ Practice on Spotify ↗</a>
+    </div>
+
+    <section id="live">
+      <div id="bnRec" class="banner rec">Recording timing: press <kbd>Space</kbd> as each line <b>starts</b>. Jump keys (<kbd>C</kbd> <kbd>1</kbd>–<kbd>9</kbd> <kbd>B</kbd> <kbd>R</kbd> <kbd>E</kbd>) follow the recording's own repeats. <kbd>K</kbd> marks an instrumental break, <kbd>←</kbd> undoes. Press <kbd>S</kbd> to finish.</div>
+      <div class="stagewrap" id="stagewrap">
+        <div class="stage" id="preview"></div>
+      </div>
+      <div class="transport">
+        <button id="btnPlay" class="pri">▶ Play <kbd>Enter</kbd></button>
+        <span class="time" id="time">0:00</span>
+        <button id="btnRec" class="recb">⏺ Record timing <kbd>S</kbd></button>
+        <button id="btnFollow" class="tog on">Auto-follow on <kbd>P</kbd></button>
+        <span class="nudge">Timing <button id="nudgeM" title="Show lines later ([)">−</button><span id="offs">0.0s</span><button id="nudgeP" title="Show lines earlier (])">+</button></span>
+        <span class="status" id="status"></span>
+      </div>
+      <div class="media" id="mediaPanel"></div>
+      <div class="upnext" id="upnext"></div>
+      <div class="chips" id="chips"></div>
+      <div class="cols">
+        <div class="cue" id="cue"></div>
+        <div class="keys">
+          <table>
+            <tr><td><kbd>Space</kbd> <kbd>→</kbd> <kbd>PgDn</kbd></td><td>Next line</td></tr>
+            <tr><td><kbd>←</kbd> <kbd>PgUp</kbd></td><td>Previous line</td></tr>
+            <tr><td><kbd>↓</kbd> · <kbd>↑</kbd></td><td>Next · previous section</td></tr>
+            <tr><td><kbd>C</kbd></td><td>Chorus / Reff</td></tr>
+            <tr><td><kbd>1</kbd>–<kbd>9</kbd></td><td>Verse / Bait 1–9</td></tr>
+            <tr><td><kbd>Shift</kbd>+<kbd>C</kbd></td><td>Pre-chorus</td></tr>
+            <tr><td><kbd>B</kbd> · <kbd>I</kbd></td><td>Bridge · Intro</td></tr>
+            <tr><td><kbd>R</kbd></td><td>Repeat this section</td></tr>
+            <tr><td><kbd>E</kbd></td><td>Jump to ending</td></tr>
+            <tr><td><kbd>T</kbd> · <kbd>K</kbd> <kbd>.</kbd></td><td>Title · Blank screen</td></tr>
+            <tr><td><kbd>Enter</kbd></td><td>Play / pause music</td></tr>
+            <tr><td><kbd>P</kbd></td><td>Auto-follow on/off</td></tr>
+            <tr><td><kbd>[</kbd> <kbd>]</kbd></td><td>Nudge timing</td></tr>
+            <tr><td><kbd>-</kbd> <kbd>=</kbd></td><td>Text size</td></tr>
+            <tr><td><kbd>N</kbd> · <kbd>Shift</kbd>+<kbd>N</kbd></td><td>Next · previous song</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="edit" hidden>
+      <div class="edgrid">
+        <div>
+          <div class="grid2">
+            <div><label for="eTitle">Title</label><input type="text" id="eTitle"></div>
+            <div><label for="eArtist">Artist</label><input type="text" id="eArtist"></div>
+            <div><label for="eLang">Language</label><select id="eLang"><option value="en">English</option><option value="id">Bahasa Indonesia</option><option value="other">Other</option></select></div>
+          </div>
+          <p class="hint" id="eFile"></p>
+          <label for="eSpot">Spotify link (for practicing)</label>
+          <div class="row"><input type="url" id="eSpot" placeholder="Paste a track link, or leave empty to use a Spotify search" style="flex:1"><a id="eSpotFind" href="#" target="_blank" rel="noopener">Find on Spotify ↗</a></div>
+          <label for="eSrc">Lyrics page (optional, for reference)</label>
+          <div class="row"><input type="url" id="eSrc" placeholder="https://genius.com/..." style="flex:1"><a id="eSrcOpen" href="#" target="_blank" rel="noopener">Open ↗</a></div>
+          <label for="eLyrics">Lyrics (paste here)</label>
+          <textarea id="eLyrics" spellcheck="false" placeholder="Paste lyrics. Section labels are detected automatically, for example:
+
+[Verse 1]
+First line of the verse
+Second line
+
+[Chorus]
+Chorus line one
+Chorus line two (2x)
+
+Bahasa Indonesia labels work too:
+Bait 1:
+...
+Reff:
+...
+
+Without labels, blank lines split the parts, and a part that comes back is treated as the chorus."></textarea>
+          <p class="hint">Copied straight from Genius? The page title, contributors, &quot;You might also like&quot; and &quot;Embed&quot; are cleaned up automatically. Write <b>(2x)</b> after a line or label to repeat it.</p>
+        </div>
+        <div>
+          <label>Detected sections</label>
+          <table class="struct" id="eStruct"></table>
+          <label for="eOrder">Song order (codes, separated by spaces; <b>C*2</b> = chorus twice)</label>
+          <div class="row"><input type="text" id="eOrder" style="flex:1"><button id="eOrderReset">Reset</button></div>
+          <div class="err" id="eOrderErr"></div>
+
+          <label>Music</label>
+          <div class="radios" id="eMedia">
+            <label><input type="radio" name="mt" value="none"> Live musicians (manual)</label>
+            <label><input type="radio" name="mt" value="audio"> Audio file</label>
+            <label><input type="radio" name="mt" value="clock"> Spotify / other app</label>
+          </div>
+          <div id="eMediaAudio"><label for="eAudio">Audio file (MP3, M4A, WAV), kept on this computer</label><input type="file" id="eAudio" accept="audio/*"><p class="hint" id="eAudioName"></p><p class="hint">Instrumental, &quot;minus one&quot; or karaoke tracks work best when nobody can play.</p></div>
+          <div id="eMediaClock"><p class="hint">Music plays in Spotify (the Spotify link above); this app runs a matching clock. Press <b>Start clock</b> at the moment you press play in Spotify.</p></div>
+
+          <label for="eScene">Background for this song</label>
+          <div class="row"><select id="eScene" style="flex:1"></select><select id="ePal" style="flex:1" aria-label="Colors"></select><button id="eShuffle" title="Pick a new random look">Shuffle</button></div>
+          <div class="stage bgprev" id="eBgPrev"></div>
+          <p class="hint">“Default” follows the default background in the sidebar. “Random” picks a new look each time the song opens.</p>
+          <div class="grid2" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+            <div><label for="eFs">Text size</label><input type="range" id="eFs" min="0.6" max="1.5" step="0.05" style="width:100%"></div>
+            <div><label for="eLines">Each screen shows</label><select id="eLines"><option value="99">Whole section</option><option value="6">Long sections split in pages (max 6 lines)</option><option value="4">Long sections split in pages (max 4 lines)</option></select></div>
+          </div>
+          <div class="row" style="margin-top:18px">
+            <button id="eDup">Duplicate song</button>
+            <button id="eDel" style="border-color:#5a2a2c;color:#f3a7a9">Delete song</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="help"><div class="card">
+  <div class="row" style="justify-content:space-between"><h2 style="font-size:18px;color:var(--ink);margin:0">How to use it <small style="font-weight:400;color:var(--mute)">· version 1.7.0</small></h2><button id="helpClose">Close <kbd>Esc</kbd></button></div>
+  <h3>1 · Add a song</h3>
+  <ol><li><b>+ New song</b>, then paste the lyrics into the <b>Edit song</b> tab. Sections like Verse, Chorus, Bait and Reff are detected automatically.</li>
+  <li>Check the <b>song order</b>. Genius usually lists the full order already; fix it if your group sings it differently.</li>
+  <li>Choose the music: an audio file (best: an instrumental or minus-one track), Spotify (uses a clock) or live musicians.</li></ol>
+  <h3>2 · Teach it the timing once (for recorded music)</h3>
+  <ol><li>On the <b>Live</b> tab press <b>Record timing</b> (<kbd>S</kbd>). The music starts from the beginning.</li>
+  <li>Tap <kbd>Space</kbd> at the start of every line. If the recording repeats a chorus, press <kbd>C</kbd>; for a section again, <kbd>R</kbd>; for an instrumental break, <kbd>K</kbd>. Made a mistake? <kbd>←</kbd> undoes the last tap.</li>
+  <li>Press <kbd>S</kbd> at the end. From now on the lyrics move by themselves whenever that track plays. If they feel early or late, nudge with <kbd>[</kbd> <kbd>]</kbd>.</li></ol>
+  <h3>Where songs are saved</h3>
+  <p>Best: click <b>Choose songs folder…</b> in the sidebar and pick a folder in Google Drive, Dropbox or iCloud Drive. Each song becomes a plain text file (for example <code>Give Thanks - Don Moen.txt</code>) that anyone can open and edit. Timing, song order and backgrounds go in <code>_worship-app.json</code>, and audio in an <code>audio</code> subfolder. Point the app at the same synced folder on another laptop and everything is there.</p>
+  <p>To add a song without the app, save a text file in the folder like this (the top lines are optional):</p>
+  <p><code>Title: Bersyukur</code><br><code>Artist: ...</code><br><code>Language: Indonesian</code><br><br><code>Bait 1:</code> … <code>Reff:</code> …</p>
+  <p>Deleted songs and sessions go to a <code>_trash</code> subfolder, so nothing is lost by accident. The app picks up new and changed files whenever you switch back to its window. Without a folder, songs are saved in this browser only.</p>
+  <h3>Worship sessions</h3>
+  <p>A session is the run-sheet for one meeting: Welcome screen (group name and date), songs, Prayer, Sharing (title and name) and Prayer Requests. Click any item to show it, press <kbd>N</kbd> for the next item, or keep pressing <kbd>Space</kbd>: after the last line of a song it moves on to the next item. With a songs folder, each session is saved as a text file in a <code>sessions</code> subfolder, for example:</p>
+  <p><code>Session: Home Family Caregroup</code><br><code>Date: 2026-11-28</code><br><br><code>Welcome</code><br><code>Song: Give Thanks - Don Moen</code><br><code>Prayer: Opening prayer | Budi</code><br><code>Sharing: God's faithfulness | Nadya</code><br><code>Prayer Requests:</code><br><code>- Healing for ...</code></p>
+  <h3>3 · During worship</h3>
+  <ol><li>Connect the laptop to the TV. Then either click <b>Open TV window</b> and drag it onto the TV (double-click it for full screen), or mirror the screen and press <kbd>F</kbd>.</li>
+  <li>Press <kbd>Enter</kbd> to start the music. Any key overrides: during a recording, <kbd>C</kbd> or <kbd>R</kbd> moves the music too, so you can sing the chorus one more time.</li>
+  <li>With live musicians (no recording), <kbd>Space</kbd> advances, and <kbd>C</kbd> <kbd>1</kbd>–<kbd>9</kbd> <kbd>B</kbd> <kbd>R</kbd> <kbd>E</kbd> follow whatever the leader does. A presentation clicker works too (Page Up / Page Down).</li></ol>
+</div></div>
+<div class="modal" id="nsModal"><div class="card">
+  <div class="row" style="justify-content:space-between"><h2 style="font-size:18px;color:var(--ink);margin:0">New song</h2><button id="nsClose">Cancel</button></div>
+  <div class="grid2"><div><label for="nsTitle">Title</label><input type="text" id="nsTitle" placeholder="Give Thanks"></div><div><label for="nsArtist">Artist</label><input type="text" id="nsArtist" placeholder="Don Moen"></div><div><label for="nsLang">Language</label><select id="nsLang"><option value="en">English</option><option value="id">Bahasa Indonesia</option><option value="other">Other</option></select></div></div>
+  <label for="nsSpot">Spotify link (optional)</label>
+  <div class="row"><input type="url" id="nsSpot" placeholder="https://open.spotify.com/track/..." style="flex:1"><a id="nsFind" href="#" target="_blank" rel="noopener">Find on Spotify ↗</a></div>
+  <label for="nsLyrics">Lyrics</label>
+  <textarea id="nsLyrics" style="min-height:260px" placeholder="Paste lyrics here (from Genius or anywhere). [Verse 1] / [Chorus] or Bait / Reff labels are detected."></textarea>
+  <label style="display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="nsAdd" checked> Add to the current worship session</label>
+  <div class="row" style="margin-top:12px;justify-content:space-between"><span class="hint" id="nsWhere"></span><button id="nsCreate" class="pri">Create song</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=t=>{t=Math.max(0,t||0);const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+String(s).padStart(2,'0')};
+let toastT;function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2600)}
+
+/* ---------- backgrounds ---------- */
+const SCENES={aurora:'Soft light',rays:'Light rays',bokeh:'Floating lights',stars:'Starry sky',waves:'Gentle waves',still:'Still gradient'};
+const PALS={
+ night:{n:'Night blue',base:'#060b1d',c:['#2b4cff','#7a3cff','#1fb6ff']},
+ dawn:{n:'Sunrise',base:'#170910',c:['#ff7a45','#ffb347','#c2185b']},
+ forest:{n:'Forest',base:'#05120d',c:['#2e8b57','#9acd32','#1abc9c']},
+ ocean:{n:'Ocean',base:'#021220',c:['#0077b6','#00b4d8','#48cae4']},
+ plum:{n:'Plum',base:'#10061a',c:['#9b5de5','#f15bb5','#6a4c93']},
+ ember:{n:'Ember',base:'#120604',c:['#ff4d00','#ff9e00','#a3122a']},
+ gold:{n:'Gold',base:'#0e0a04',c:['#d4a017','#f2c14e','#9b6a1a']},
+ rose:{n:'Rose',base:'#14070c',c:['#e75480','#ffb6c1','#b0306a']},
+ mono:{n:'Silver',base:'#0a0b0e',c:['#5b6475','#a3acbd','#3a4150']}
+};
+let customBg=null,lastPick={sc:null,pal:null};
+const pick=(arr,avoid)=>{const a=arr.filter(x=>x!==avoid);return a[Math.floor(Math.random()*a.length)]};
+function resolveBg(song){
+  let sc=song?.bgScene||'default',pal=song?.bgPal||'random';
+  if(sc==='default'){sc=db.defScene||'random';pal=db.defPal||'random'}
+  if(sc==='image'&&!customBg)sc='random';
+  if(sc==='random')sc=pick(Object.keys(SCENES).filter(k=>k!=='still'),lastPick.sc);
+  if(pal==='random'||!PALS[pal])pal=pick(Object.keys(PALS),lastPick.pal);
+  if(sc!=='image')lastPick={sc,pal};
+  return{sc,pal,seed:Math.random()};
+}
+function sceneInner(sc,seed){
+  let r=seed*9301+49297;const rnd=()=>{r=(r*9301+49297)%233280;return r/233280};
+  if(sc==='aurora'||sc==='waves')return'<i></i><i></i><i></i>';
+  if(sc==='rays')return'<i></i><i></i>';
+  if(sc==='bokeh'){let h='';for(let i=0;i<16;i++){const d=45+rnd()*45;h+=`<i style="left:${(rnd()*100-8).toFixed(1)}%;width:${(4+rnd()*14).toFixed(1)}cqw;--k:var(--c${1+i%3});--o:${(.18+rnd()*.32).toFixed(2)};--d:${d.toFixed(0)}s;--dl:-${(rnd()*d).toFixed(0)}s"></i>`}return h}
+  if(sc==='stars'){let h='';for(let L=0;L<3;L++){const g=[];for(let i=0;i<45;i++){const z=(0.6+rnd()*1.4).toFixed(1);g.push(`radial-gradient(${z}px ${z}px at ${(rnd()*100).toFixed(1)}% ${(rnd()*100).toFixed(1)}%,rgba(255,255,255,${(.5+rnd()*.5).toFixed(2)}),transparent)`)}h+=`<i style="background-image:${g.join(',')};--d:${(4+L*2.5).toFixed(1)}s;animation-delay:-${L*1.7}s"></i>`}
+    return h+'<i style="background:radial-gradient(ellipse 50% 30% at 30% 60%,color-mix(in srgb,var(--c3) 18%,transparent),transparent 70%)"></i>'}
+  return'';
+}
+function bgModel(spec){
+  const anim=db.anim!==false;
+  if(!spec)spec={sc:'still',pal:'night',seed:0};
+  if(spec.sc==='image'&&customBg)return{bgKey:'img|'+anim+'|'+customBg.length,bgCls:'bg img'+(anim?' anim':''),bgStyle:`background-image:url("${customBg}")`,bgInner:''};
+  const P=PALS[spec.pal]||PALS.night;
+  return{bgKey:[spec.sc,spec.pal,spec.seed,anim].join('|'),bgCls:'bg sc-'+spec.sc+(anim?'':' noanim'),bgStyle:`--base:${P.base};--c1:${P.c[0]};--c2:${P.c[1]};--c3:${P.c[2]}`,bgInner:sceneInner(spec.sc,spec.seed)};
+}
+function paintBg(root,spec){paint(root,Object.assign({cls:'stage',html:'',fs:1,n:4},bgModel(spec)))}
+
+/* ---------- storage ---------- */
+const LS='worshipLyrics.v1';
+let db={songs:[],sessions:[],curSess:null,last:null};
+function save(){if(FS.dir){try{localStorage.setItem(LS+'.last',db.last||'');localStorage.setItem(LS+'.sess',FS.sfiles[db.curSess]?.name||'')}catch(e){}schedule();return}try{localStorage.setItem(LS,JSON.stringify(db))}catch(e){toast('Could not save (browser storage unavailable)')}}
+let idb=null;
+function idbOpen(){return new Promise(res=>{try{const r=indexedDB.open('worshipLyrics',1);r.onupgradeneeded=()=>r.result.createObjectStore('blobs');r.onsuccess=()=>{idb=r.result;res(idb)};r.onerror=()=>res(null)}catch(e){res(null)}})}
+function idbPut(k,v){return new Promise(res=>{if(!idb)return res(false);try{const t=idb.transaction('blobs','readwrite');t.objectStore('blobs').put(v,k);t.oncomplete=()=>res(true);t.onerror=()=>res(false)}catch(e){res(false)}})}
+function idbGet(k){return new Promise(res=>{if(!idb)return res(null);try{const r=idb.transaction('blobs').objectStore('blobs').get(k);r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null)}catch(e){res(null)}})}
+function idbDel(k){if(!idb)return;try{idb.transaction('blobs','readwrite').objectStore('blobs').delete(k)}catch(e){}}
+
+/* ---------- lyrics parsing ---------- */
+const W='(?:verse|bait|ayat|stanza|chorus|reff?|refrain|refrein|korus|pre-?chorus|pra-?reff?|pre-?reff?|post-?chorus|bridge|jembatan|intro|outro|ending|coda|akhir|tag|interlude|instrumental|musik|vamp|hook)\\b';
+const HDR_ALONE=new RegExp('^\\(?\\s*'+W+'(?:\\s*\\d+)?(?:\\s*[-–:]\\s*[^\\n]{0,24})?\\s*(?:\\(?\\s*(?:x\\s*\\d+|\\d+\\s*x)\\s*\\)?)?\\s*\\)?\\s*[:.]?$','i');
+const HDR_INLINE=new RegExp('^('+W+'\\s*\\d*)\\s*[:.]\\s+(.+)$','i');
+const REP=/[\s(\[]*(?:x\s*(\d+)|(\d+)\s*x)[\s)\]]*$/i;
+const LINE_REP=/\s*[(\[]\s*(?:x\s*(\d+)|(\d+)\s*x)\s*[)\]]\s*$|\s+(?:x(\d+)|(\d+)x)\s*$/i;
+const JUNK=[/^\d+\s*contributors?/i,/^translations?$/i,/you might also like/i,/^\d*\s*embed$/i,/^see .+ live$/i,/^get tickets as low as/i,/^read more$/i];
+function mkH(raw){let n=raw.split(':')[0].trim();const m=n.match(REP);const rep=m?Math.min(+(m[1]||m[2])||1,6):1;if(m)n=n.slice(0,m.index).trim();n=n.replace(/^\(|\)$/g,'').replace(/[:.]$/,'').trim();return{name:n||'Section',rep}}
+function parseHeader(s){
+  if(!s||s.length>60)return null;
+  let m=s.match(/^\[(.+?)\]$/);if(m)return mkH(m[1]);
+  m=s.match(HDR_INLINE);if(m)return Object.assign(mkH(m[1]),{inline:m[2]});
+  if(s.length<=32&&HDR_ALONE.test(s))return mkH(s);
+  return null;
+}
+function classify(name){
+  const n=(name||'').toLowerCase();const num=(n.match(/\d+/)||[])[0];
+  let type='other';
+  if(/pre-?chorus|pra-?reff?|pre-?reff?/.test(n))type='pre';
+  else if(/post-?chorus/.test(n))type='post';
+  else if(/chorus|\breff?\b|refrain|refrein|korus|hook/.test(n))type='chorus';
+  else if(/verse|bait|ayat|stanza/.test(n))type='verse';
+  else if(/bridge|jembatan/.test(n))type='bridge';
+  else if(/intro/.test(n))type='intro';
+  else if(/outro|ending|coda|akhir/.test(n))type='end';
+  else if(/\btag\b|vamp/.test(n))type='tag';
+  else if(/interlude|instrumental|musik/.test(n))type='inst';
+  return{type,num:num?+num:null};
+}
+const PFX={verse:'V',chorus:'C',pre:'PC',post:'PO',bridge:'B',intro:'I',end:'E',tag:'T',inst:'M',other:'X'};
+function recode(song){
+  const used={};let vn=0;const firstSeen=[];
+  (song.order||[]).forEach(i=>{if(!firstSeen.includes(i))firstSeen.push(i)});
+  song.sections.forEach((_,i)=>{if(!firstSeen.includes(i))firstSeen.push(i)});
+  firstSeen.forEach(i=>{const s=song.sections[i];if(s.type==='verse'){if(s.num==null||s.autoNum){vn++;s.num=vn;s.autoNum=true}else vn=Math.max(vn,s.num)}});
+  firstSeen.forEach(i=>{const s=song.sections[i];let c=PFX[s.type]||'X';if(s.type==='verse')c='V'+s.num;
+    let code=c,k=2;while(used[code])code=c+(k++);used[code]=1;s.code=code});
+  song.orderText=(song.order||[]).map(i=>song.sections[i]?.code).filter(Boolean).join(' ');
+}
+function parseLyrics(raw,lang){
+  let L=(raw||'').replace(/\r/g,'').split('\n').map(s=>s.replace(/ /g,' ').trim());
+  L=L.map(s=>s.replace(/(\S)\d*Embed$/,'$1').trim()).filter(s=>!JUNK.some(r=>r.test(s)));
+  const firstH=L.findIndex(s=>{const h=parseHeader(s);return h&&!h.inline});
+  if(firstH>0){const pre=L.slice(0,firstH);if(pre.some(s=>/lyrics$|contributor|read more|\bembed\b/i.test(s)||s.length>140))L=L.slice(firstH)}
+  const norm=s=>s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+  const sections=[],order=[];let blk=null;
+  const addLine=s=>{const m=s.match(LINE_REP);const n=m?Math.min(+(m[1]||m[2]||m[3]||m[4])||1,4):1;const t=m?s.slice(0,m.index).trim():s;if(!t)return;for(let i=0;i<n;i++)blk.lines.push(t)};
+  const finish=()=>{
+    if(!blk)return;const b=blk;blk=null;
+    if(!b.lines.length){
+      if(!b.name)return;
+      let k=sections.findIndex(x=>norm(x.name)===norm(b.name));
+      if(k<0){const t=classify(b.name).type;if(['inst','intro','end','tag'].includes(t)){sections.push({name:b.name,lines:['♪   ♪   ♪'],auto:false});k=sections.length-1}else return}
+      for(let r=0;r<b.rep;r++)order.push(k);return;
+    }
+    const text=b.lines.map(norm).join('|');
+    let k=sections.findIndex(x=>x.lines.map(norm).join('|')===text);
+    if(k<0){let name=b.name;if(name){const same=sections.filter(x=>norm(x.name).replace(/ \d+$/,'')===norm(name)).length;if(same)name+=' ('+(same+1)+')'}
+      sections.push({name,lines:b.lines.slice(),auto:!b.name});k=sections.length-1}
+    else if(b.name&&sections[k].auto){sections[k].name=b.name;sections[k].auto=false}
+    for(let r=0;r<b.rep;r++)order.push(k);
+  };
+  for(const s of L){
+    const h=parseHeader(s);
+    if(h){finish();blk={name:h.name,rep:h.rep,lines:[]};if(h.inline)addLine(h.inline);continue}
+    if(!s){if(blk&&blk.lines.length)finish();continue}
+    if(!blk)blk={name:'',rep:1,lines:[]};
+    addLine(s);
+  }
+  finish();
+  const counts={};order.forEach(i=>counts[i]=(counts[i]||0)+1);
+  const hasChorus=sections.some(x=>!x.auto&&classify(x.name).type==='chorus');
+  let chorusSet=false,vn=0;const seen=[];order.forEach(i=>{if(!seen.includes(i))seen.push(i)});
+  seen.forEach(i=>{const x=sections[i];if(!x.auto)return;
+    if(!hasChorus&&!chorusSet&&counts[i]>1){x.name=lang==='id'?'Reff':'Chorus';chorusSet=true}
+    else x.name=(lang==='id'?'Bait ':'Verse ')+(++vn)});
+  sections.forEach(x=>{const c=classify(x.name);x.type=c.type;x.num=c.num;delete x.auto});
+  return{sections,order};
+}
+function parseOrder(S,text){const map={};S.sections.forEach((x,i)=>map[x.code.toUpperCase()]=i);const out=[],bad=[];String(text||'').split(/[\s,]+/).filter(Boolean).forEach(tok=>{const m=tok.toUpperCase().match(/^(.+?)(?:\*(\d))?$/);const i=map[m[1]];if(i==null)bad.push(tok);else for(let r=0;r<(+m[2]||1);r++)out.push(i)});return{out,bad}}
+function sigOf(song){return (song.sections||[]).map(s=>s.lines.length).join(',')}
+function reparse(song){const p=parseLyrics(song.lyrics,song.lang);song.sections=p.sections;song.order=p.order;recode(song);song.sig=sigOf(song)}
+
+/* ---------- songs ---------- */
+function uid(){return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function newSong(o){return Object.assign({id:uid(),title:'Untitled song',artist:'',lang:'en',src:'',lyrics:'',spotify:'',sections:[],order:[],orderText:'',sig:'',media:{type:'none',yt:'',link:'',audioName:'',audioFile:''},timeline:[],tlSig:'',offset:0,bgScene:'default',bgPal:'random',fs:1,lines:99},o||{})}
+function seed(){
+  const ag=newSong({title:'Amazing Grace',artist:'John Newton (public domain)',lyrics:`[Verse 1]
+Amazing grace! How sweet the sound
+That saved a wretch like me!
+I once was lost, but now am found,
+Was blind, but now I see.
+
+[Verse 2]
+'Twas grace that taught my heart to fear,
+And grace my fears relieved;
+How precious did that grace appear
+The hour I first believed.
+
+[Verse 3]
+Through many dangers, toils and snares,
+I have already come;
+'Tis grace hath brought me safe thus far,
+And grace will lead me home.
+
+[Verse 4]
+When we've been there ten thousand years,
+Bright shining as the sun,
+We've no less days to sing God's praise
+Than when we'd first begun.`});
+  const gt=newSong({title:'Give Thanks',artist:'Don Moen',src:'https://genius.com/Don-moen-give-thanks-lyrics',spotify:'https://open.spotify.com/track/1DNQiq4vXQbqHKSa6kpTRt',media:{type:'clock',yt:'',link:'',audioName:''}});
+  const gg=newSong({title:'Goodness of God',artist:'CeCe Winans',src:'https://genius.com/Cece-winans-goodness-of-god-live-lyrics'});
+  const ty=newSong({title:'Thank You Lord',artist:'Don Moen',src:'https://genius.com/Don-moen-thank-you-lord-lyrics'});
+  [ag,gt,gg,ty].forEach(reparse);
+  db.songs=[gt,gg,ty,ag];const Z=templateSession([gt.id,gg.id,ty.id]);db.sessions=[Z];db.curSess=Z.id;db.last=gt.id;save();
+}
+const songById=id=>db.songs.find(s=>s.id===id);
+
+/* ---------- state ---------- */
+let st={bg:null,slide:null,itemIdx:-1,song:null,seq:[],view:'title',s:0,l:0,pos:-1,detour:null,tl:-1,follow:true,rec:false,recBuf:[],ov:null,hold:null};
+const secLen=si=>st.song?.sections[si]?.lines.length||0;
+function buildSeq(){const out=[];const S=st.song;(S?.order||[]).forEach((si,b)=>{const sec=S.sections[si];if(!sec)return;sec.lines.forEach((_,l)=>out.push({s:si,l,b}))});st.seq=out}
+function blockEnd(p){const q=st.seq;if(p<0)return 0;if(p>=q.length)return q.length;const b=q[p].b;let i=p;while(i<q.length&&q[i].b===b)i++;return i}
+function showPos(){
+  if(st.detour){st.view='line';st.s=st.detour.s;st.l=st.detour.l}
+  else if(st.pos<0)st.view='title';
+  else if(st.pos>=st.seq.length)st.view='blank';
+  else{st.view='line';st.s=st.seq[st.pos].s;st.l=st.seq[st.pos].l}
+}
+const isType=(type,num)=>si=>{const x=st.song.sections[si];return x&&x.type===type&&(num==null||x.num===num)};
+const isSec=k=>si=>si===k;
+
+/* manual (arrangement) navigation */
+function mNext(){if(st.detour){const d=st.detour;d.l++;if(d.l>=secLen(d.s)){st.pos=d.ret;st.detour=null}}else st.pos=Math.min(st.pos+1,st.seq.length);showPos()}
+function mPrev(){if(st.detour){st.detour.l--;if(st.detour.l<0)st.detour=null}else st.pos=Math.max(st.pos-1,-1);showPos()}
+function mJump(pred){
+  const q=st.seq;const from=st.detour?st.detour.ret:(st.pos<0?0:blockEnd(st.pos));
+  for(let i=from;i<q.length;i++)if(q[i].l===0&&pred(q[i].s)){st.pos=i;st.detour=null;showPos();return true}
+  let si=-1;for(let i=Math.min(st.pos,q.length-1);i>=0;i--)if(pred(q[i].s)){si=q[i].s;break}
+  if(si<0)si=st.song.sections.findIndex((_,k)=>pred(k));
+  if(si<0||!secLen(si))return false;
+  st.detour={s:si,l:0,ret:from};showPos();return true;
+}
+function mRepeat(){
+  if(st.detour)st.detour.l=0;
+  else if(st.pos>=0&&st.pos<st.seq.length)st.detour={s:st.seq[st.pos].s,l:0,ret:blockEnd(st.pos)};
+  else if(st.pos>=st.seq.length&&st.seq.length)st.detour={s:st.seq[st.seq.length-1].s,l:0,ret:st.seq.length};
+  showPos();
+}
+function lastBlockIdx(list,getS){let t=-1;for(let i=list.length-1;i>=0;i--){const e=list[i];if(e.v||e.l!==0)continue;const ty=st.song.sections[getS(e)]?.type;if(ty==='end'||ty==='tag'){t=i;break}}
+  if(t<0)for(let i=list.length-1;i>=0;i--){if(!list[i].v&&list[i].l===0){t=i;break}}return t}
+function blockStart(p){const q=st.seq;if(p<=0)return 0;if(p>=q.length)p=q.length-1;const b=q[p].b;let i=p;while(i>0&&q[i-1].b===b)i--;return i}
+function mNextSec(){if(st.detour){st.pos=st.detour.ret;st.detour=null}else st.pos=st.pos<0?0:blockEnd(st.pos);showPos()}
+function mPrevSec(){if(st.detour){st.detour=null;st.pos=Math.max(0,blockStart(st.pos));showPos();return}
+  if(st.pos<0)return;if(st.pos>=st.seq.length){st.pos=blockStart(st.seq.length-1);showPos();return}
+  const cur=blockStart(st.pos);st.pos=cur>0?blockStart(cur-1):(st.pos>0?0:-1);showPos()}
+function mEnd(){const t=lastBlockIdx(st.seq,e=>e.s);if(t>=0){st.pos=t;st.detour=null;showPos()}}
+function syncPosFromView(){
+  if(st.view!=='line'){st.pos=st.view==='title'?-1:st.seq.length;st.detour=null;return}
+  let best=-1;for(let i=0;i<st.seq.length;i++)if(st.seq[i].s===st.s&&st.seq[i].l===st.l){best=i;if(i>=st.pos)break}
+  if(best>=0){st.pos=best;st.detour=null}else{st.detour={s:st.s,l:st.l,ret:Math.max(0,st.pos+1)}}
+}
+
+/* timeline navigation */
+const T=()=>st.song?.timeline||[];
+function tBlockStart(j){const A=T();let k=j;while(k>0&&!A[k].v&&A[k].l>0&&!A[k-1].v&&A[k-1].s===A[j].s)k--;return k}
+function tBlockEnd(j){const A=T();let k=j+1;while(k<A.length&&!A[k].v&&A[k].s===A[j].s&&A[k].l>0)k++;return k}
+const SEEK_PAD=0.6;
+function tGo(j){const A=T();const e=A[j];if(!e)return;seekTo(e.t-SEEK_PAD);st.hold={j,until:performance.now()+1200};applyEntry(j)}
+function tNext(){tGo(Math.min(st.tl+1,T().length-1))}
+function tPrev(){tGo(Math.max(st.tl-1,0))}
+function tJump(pred){
+  const A=T();const cur=st.tl;const from=cur<0?0:tBlockEnd(cur);
+  for(let j=from;j<A.length;j++)if(!A[j].v&&A[j].l===0&&pred(A[j].s))return tGo(j),true;
+  for(let j=Math.min(Math.max(cur,0),A.length-1);j>=0;j--)if(!A[j].v&&A[j].l===0&&pred(A[j].s))return tGo(j),true;
+  return false;
+}
+function tRepeat(){const A=T();if(st.tl>=0&&!A[st.tl].v)tGo(tBlockStart(st.tl));else if(st.tl>0)tGo(tBlockStart(st.tl-1))}
+function tNextSec(){const A=T();let j=st.tl<0?0:(A[st.tl]?.v?st.tl+1:tBlockEnd(st.tl));while(j<A.length&&(A[j].v||A[j].l!==0))j++;if(j<A.length)tGo(j);else toast('Last section')}
+function tPrevSec(){const A=T();if(st.tl<=0){if(A.length)tGo(0);return}let k=A[st.tl].v?st.tl:tBlockStart(st.tl);k--;while(k>0&&A[k].v)k--;if(k<0){tGo(0);return}tGo(A[k].v?k:tBlockStart(k))}
+function tEnd(){const t=lastBlockIdx(T(),e=>e.s);if(t>=0)tGo(t)}
+function applyEntry(j){st.tl=j;if(j<0){st.view='title';return}const e=T()[j];if(!e)return;
+  if(e.v){st.view=e.v;return}if(!st.song.sections[e.s]||e.l>=secLen(e.s)){st.view='blank';return}st.view='line';st.s=e.s;st.l=e.l}
+
+/* ---------- media ---------- */
+const aud=new Audio();aud.preload='auto';let audURL=null;
+const clock={base:0,at:null,get t(){return this.base+(this.at?(performance.now()-this.at)/1000:0)},start(){if(!this.at)this.at=performance.now()},pause(){this.base=this.t;this.at=null},set(t){this.base=Math.max(0,t);if(this.at)this.at=performance.now()},reset(){this.base=0;this.at=null}};
+function mType(){return st.song?.media?.type||'none'}
+function mReady(){const t=mType();if(t==='audio')return!!aud.src;return t==='clock'}
+function mTime(){const t=mType();try{if(t==='audio')return aud.currentTime||0;if(t==='clock')return clock.t}catch(e){}return 0}
+function mDur(){const t=mType();try{if(t==='audio')return aud.duration||0}catch(e){}return 0}
+function mPlaying(){const t=mType();try{if(t==='audio')return!aud.paused;if(t==='clock')return!!clock.at}catch(e){}return false}
+function play(){const t=mType();try{if(t==='audio')aud.play().catch(()=>toast('Press Play again to allow audio'));else if(t==='clock')clock.start()}catch(e){}}
+function pause(){const t=mType();try{if(t==='audio')aud.pause();else if(t==='clock')clock.pause()}catch(e){}}
+function playPause(){if(mType()==='none'){toast('This song is set to live musicians. Use Space to advance.');return}if(!mReady()){toast('Music is not ready yet');return}mPlaying()?pause():play();setTimeout(updTransport,150)}
+function seekTo(t){t=Math.max(0,t);const k=mType();try{if(k==='audio')aud.currentTime=t;else if(k==='clock')clock.set(t)}catch(e){}}
+aud.addEventListener('ended',()=>{if(hfOn()&&hasNextItem()&&!st.rec){toast('Hands-free: next item in 3 seconds');clearTimeout(st.hfT);const S=st.song;st.hfT=setTimeout(()=>{if(st.song===S&&!mPlaying())stepItem(1)},3000)}});
+aud.addEventListener('play',()=>updTransport());aud.addEventListener('pause',()=>updTransport());
+
+/* ---------- stage rendering ---------- */
+const STAGE_CSS=$('#stagecss').textContent;
+let tv=null;
+function stageModel(){
+  const S=st.song;const m=Object.assign({cls:'stage',html:'',fs:S?.fs||1},bgModel(st.bg));
+  if(st.slide){m.fs=1;if(st.ov==='blank')return m;return Object.assign(m,slideModel(st.slide))}
+  if(!S){m.html='';return m}
+  const view=st.ov||st.view;
+  const badge=st.rec?'<div class="badge">● REC</div>':'';
+  if(view==='blank'){m.html=badge;return m}
+  if(view==='title'||!S.sections.length){m.html=`<div class="ct"><div class="ttl"><h1>${esc(S.title)}</h1>${S.artist?`<p>${esc(S.artist)}</p>`:''}${!S.sections.length?'<p>(No lyrics yet: paste them in the Edit tab)</p>':''}</div></div>`+badge;return m}
+  const sec=S.sections[st.s];if(!sec){m.html=badge;return m}
+  const len=sec.lines.length;const per=S.lines&&S.lines<99?S.lines:len;
+  const pages=Math.ceil(len/per),size=Math.ceil(len/pages);const a=Math.floor(st.l/size)*size;const N=Math.min(size,len-a);
+  let lines='';for(let i=a;i<a+N;i++)lines+=`<div class="ln${i===st.l?' cur':i<st.l?' done':''}"><span>${esc(sec.lines[i])}</span></div>`;
+  let nxt='';if(st.l===len-1){const n=nextBlockName();if(n)nxt=`<div class="nxt">${S.lang==='id'?'Berikutnya':'Next'}: ${esc(n)}</div>`}
+  m.n=N;m.html=`<div class="sec">${esc(sec.name)}${pages>1?` <span style="opacity:.6">${Math.floor(st.l/size)+1}/${pages}</span>`:''}</div><div class="ct">${lines}</div>${nxt}${badge}`;
+  return m;
+}
+function nextSectionName(){const S=st.song;if(!S)return'';
+  if(followActive()){const A=T();for(let j=Math.max(st.tl+1,0);j<A.length;j++)if(!A[j].v&&A[j].l===0)return S.sections[A[j].s]?.name||'';return''}
+  const p=st.detour?st.detour.ret:(st.pos<0?0:blockEnd(st.pos));const e=st.seq[p];return e?S.sections[e.s]?.name||'':''}
+function updUpNext(){const el=$('#upnext');if(!el)return;const Z=curSess();const ni=Z&&st.itemIdx>=0?Z.items[st.itemIdx+1]:null;
+  const niTxt=ni?itemLabel(ni,true):(Z&&st.itemIdx>=0?'End of session':'');let now='',next='',then='';
+  if(st.slide){now=itemLabel(st.slide,true);next=niTxt||'—'}
+  else if(st.song){const S=st.song,v=st.ov||st.view;const sec=S.sections[st.s];
+    now=v==='line'&&sec?`${sec.name} · line ${st.l+1} of ${sec.lines.length}`:v==='title'?'Title screen':'Blank screen';
+    const ns=v==='title'&&!followActive()?(st.seq[0]?S.sections[st.seq[0].s]?.name:''):nextSectionName();next=ns||'End of song';then=niTxt}
+  const d=new Date();const clk=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  el.innerHTML=`<span>Now: <b>${esc(now||'—')}</b></span><span>Next: <b>${esc(next||'—')}</b></span>${then?`<span>Next item: <b>${esc(then)}</b></span>`:''}<span class="clk">${esc(clk)}</span>`}
+function nextBlockName(){
+  const S=st.song;
+  if(followActive()){const e=T()[st.tl+1];if(e&&!e.v&&e.l===0)return S.sections[e.s]?.name;return''}
+  const p=st.detour?st.detour.ret:blockEnd(st.pos);const e=st.seq[p];return e?S.sections[e.s]?.name:'';
+}
+function paint(root,m){
+  if(!root)return;
+  let bg=root.querySelector('.bg'),ct=root.querySelector('.layer');
+  if(!bg){root.innerHTML='<div class="bg"></div><div class="veil"></div><div class="layer"></div>';bg=root.querySelector('.bg');ct=root.querySelector('.layer')}
+  root.className=m.cls||'stage';root.style.setProperty('--fs',m.fs);root.style.setProperty('--n',m.n||4);
+  if(bg.dataset.k!==m.bgKey){bg.dataset.k=m.bgKey;bg.setAttribute('style',m.bgStyle);bg.className=m.bgCls||'bg';bg.innerHTML=m.bgInner||''}
+  const key=m.html.replace(/ (cur|done)"/g,'"')+'|'+m.fs+'|'+root.clientWidth+'x'+root.clientHeight;
+  if(ct.dataset.h!==m.html){ct.dataset.h=m.html;ct.innerHTML=m.html}
+  if(ct.dataset.fk!==key){ct.dataset.fk=key;fitText(root)}
+}
+function fitText(root){const c=root.querySelector('.ct');let f=1;root.style.setProperty('--fit',f);if(!c||!c.children.length)return;
+  const H=()=>{const k=c.children,r1=k[0].getBoundingClientRect(),r2=k[k.length-1].getBoundingClientRect();return r2.bottom-r1.top};
+  const max=root.clientHeight*0.78;for(let i=0;i<14&&H()>max;i++){f*=0.92;root.style.setProperty('--fit',f)}}
+window.addEventListener('resize',()=>renderStage());
+function renderStage(){updUpNext();const m=stageModel();paint($('#preview'),m);if(tv&&!tv.closed){try{paint(tv.document.getElementById('stage'),m)}catch(e){}}}
+function openTV(){
+  tv=window.open('','worshipTV','width=1280,height=720');
+  if(!tv){toast('The browser blocked the window. Allow pop-ups for this page.');return}
+  const d=tv.document;
+  d.open();d.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Worship Lyrics: TV</title><style>${STAGE_CSS}html,body{margin:0;height:100%;background:#000;overflow:hidden}.stage{position:fixed;inset:0;width:100vw;height:100vh;aspect-ratio:auto}body.idle{cursor:none}#tip{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;transition:opacity .6s;z-index:9}</style></head><body><div class="stage" id="stage"></div><div id="tip">Drag this window onto the TV, then double-click for full screen</div></body></html>`);d.close();
+  d.addEventListener('keydown',onKey);tv.addEventListener('resize',()=>renderStage());
+  d.addEventListener('dblclick',()=>{const el=d.documentElement;if(d.fullscreenElement)d.exitFullscreen();else el.requestFullscreen&&el.requestFullscreen().catch(()=>{})});
+  let idle;d.addEventListener('mousemove',()=>{d.body.classList.remove('idle');clearTimeout(idle);idle=setTimeout(()=>d.body.classList.add('idle'),2500)});
+  setTimeout(()=>{try{d.getElementById('tip').style.opacity=0}catch(e){}},6000);
+  renderStage();
+}
+
+/* ---------- live panel ---------- */
+function followActive(){return st.follow&&!st.rec&&T().length>0&&mReady()}
+function buildCue(){
+  const S=st.song,c=$('#cue');if(st.slide){c.innerHTML=slideEditor();$('#chips').innerHTML='';return}if(!S){c.innerHTML='';return}
+  if(!S.sections.length){c.innerHTML='<div class="empty">No lyrics yet. Open <b>Edit song</b> and paste them in.</div>';$('#chips').innerHTML='';return}
+  let h='',i=0;
+  (S.order||[]).forEach((si,b)=>{const sec=S.sections[si];if(!sec)return;
+    h+=`<div class="blk"><div class="bh"><b>${esc(sec.code)}</b>${esc(sec.name)}</div>`;
+    sec.lines.forEach((t,l)=>{h+=`<div class="li" data-i="${i}" data-s="${si}" data-l="${l}">${esc(t)}</div>`;i++});h+='</div>'});
+  c.innerHTML=h||'<div class="empty">Song order is empty. Set it in the Edit tab.</div>';
+  const seen=[];(S.order||[]).forEach(si=>{if(!seen.includes(si))seen.push(si)});S.sections.forEach((_,k)=>{if(!seen.includes(k))seen.push(k)});
+  $('#chips').innerHTML=seen.map(k=>`<button data-k="${k}"><b>${esc(S.sections[k].code)}</b>${esc(S.sections[k].name)}</button>`).join('');
+}
+function hiCue(){
+  const c=$('#cue');c.querySelectorAll('.li.on').forEach(e=>e.classList.remove('on'));
+  const v=st.ov||st.view;if(v!=='line')return;
+  let el=null;
+  if(!followActive()&&!st.detour&&st.pos>=0)el=c.querySelector(`.li[data-i="${st.pos}"]`);
+  if(!el){const all=c.querySelectorAll(`.li[data-s="${st.s}"][data-l="${st.l}"]`);all.forEach(e=>e.classList.add('on'));el=all[0]}
+  if(el){el.classList.add('on');const r=el.getBoundingClientRect(),cr=c.getBoundingClientRect();if(r.top<cr.top||r.bottom>cr.bottom)c.scrollTop+=r.top-cr.top-cr.height/3}
+}
+function updTransport(){
+  const S=st.song;if(!S)return;const k=mType();
+  $('#btnPlay').innerHTML=(mPlaying()?'❚❚ Pause':'▶ Play')+' <kbd>Enter</kbd>';
+  $('#btnPlay').disabled=k==='none';
+  const d=mDur();$('#time').textContent=k==='none'?'Live':fmt(mTime())+(d?' / '+fmt(d):'');
+  $('#btnRec').classList.toggle('on',st.rec);$('#btnRec').innerHTML=st.rec?'■ Finish timing <kbd>S</kbd>':'⏺ Record timing <kbd>S</kbd>';
+  $('#btnRec').disabled=k==='none';
+  $('#btnFollow').classList.toggle('on',st.follow);$('#btnFollow').innerHTML=`Auto-follow ${st.follow?'on':'off'} <kbd>P</kbd>`;
+  $('#offs').textContent=(S.offset>0?'+':'')+(S.offset||0).toFixed(2)+'s';
+  const s=$('#status');s.classList.remove('warn');
+  if(k==='none')s.textContent='Manual: Space advances; the shortcuts follow the leader.';
+  else if(st.rec)s.textContent=`Recording: ${st.recBuf.length} cues`;
+  else if(!T().length){s.textContent='No timing yet. Press Record timing and tap along once.';s.classList.add('warn')}
+  else if(S.tlSig&&S.tlSig!==S.sig){s.textContent='Lyrics changed after timing was recorded. Consider re-recording.';s.classList.add('warn')}
+  else s.textContent=`${T().length} timing cues saved`+(st.follow?'':' (auto-follow paused)');
+  $('#bnRec').classList.toggle('show',st.rec);
+}
+function updMediaPanel(){
+  const S=st.song,p=$('#mediaPanel');if(!S){p.innerHTML='';return}
+  const k=mType();
+  if(k==='audio'){
+    p.innerHTML=`<div class="row" style="justify-content:space-between"><span>Audio file: <b>${esc(S.media.audioName||'none chosen')}</b></span></div><div id="audSlot"></div>`;
+    aud.controls=true;$('#audSlot').appendChild(aud);
+    if(!aud.src)p.insertAdjacentHTML('beforeend','<p class="hint">Choose the audio file in the Edit tab (it is kept on this computer only).</p>');
+  }else if(k==='clock'){
+    const link=`<a href="${esc(spotifyUrl(S))}" target="_blank" rel="noopener">Open in Spotify ↗</a>`;
+    p.innerHTML=`<div class="clock"><span class="big" id="clk">${fmt(clock.t)}</span><button id="clkGo" class="pri">${clock.at?'Pause clock':'Start clock'}</button><button id="clkReset">Reset</button>${link}</div><p class="hint">Press <b>Start clock</b> (or <kbd>Enter</kbd>) at the moment the music starts in the other app. If it drifts, nudge with <kbd>[</kbd> <kbd>]</kbd> or tap a line to re-sync.</p>`;
+    $('#clkGo').onclick=()=>{playPause();updMediaPanel()};$('#clkReset').onclick=()=>{clock.reset();st.tl=-2;updMediaPanel()};
+  }else p.innerHTML='Live musicians: <kbd>Space</kbd> moves to the next line, and the section keys follow whatever the leader does. Choose a backing track in the Edit tab to use auto-pacing.';
+}
+function render(){renderStage();hiCue();updTransport()}
+function updKbd(){const a=document.activeElement;const t=a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&a.type!=='checkbox'&&a.type!=='radio'&&a.type!=='range';const e=$('#kbdInd');if(!e)return;e.classList.toggle('typing',!!t);e.textContent=t?'⌨ Typing in a field: press Esc for live keys':'⌨ Live keys on'}
+document.addEventListener('focusin',updKbd);document.addEventListener('focusout',()=>setTimeout(updKbd,0));
+
+/* ---------- actions ---------- */
+function act(name,arg){
+  if(st.slide){if(name==='next'||name==='nextSec')stepItem(1);else if(name==='prev'||name==='prevSec')stepItem(-1);return}
+  if(!st.song)return;
+  if((name==='next'||name==='nextSec')&&!st.rec&&!followActive()&&!st.detour&&st.pos>=st.seq.length&&hasNextItem()){stepItem(1);return}
+  if(st.rec)return recAct(name,arg);
+  st.ov=null;
+  if(followActive()){
+    if(name==='next'){if(st.tl<0)tGo(0);else tNext()}
+    else if(name==='nextSec')tNextSec();else if(name==='prevSec')tPrevSec();
+    else if(name==='prev')tPrev();
+    else if(name==='jump'){if(!tJump(arg))toast('That section is not in this recording\'s timing')}
+    else if(name==='repeat')tRepeat();
+    else if(name==='end')tEnd();
+  }else{
+    if(name==='next')mNext();else if(name==='prev')mPrev();
+    else if(name==='nextSec')mNextSec();else if(name==='prevSec')mPrevSec();
+    else if(name==='jump'){if(!mJump(arg))toast('No such section in this song')}
+    else if(name==='repeat')mRepeat();else if(name==='end')mEnd();
+  }
+  render();
+}
+function setOverlay(v){if(st.rec){recMark(v);return}st.ov=(st.ov===v||(!st.ov&&st.view===v))?null:v;render()}
+function recStart(){
+  const S=st.song;if(mType()==='none'){toast('Choose a backing track first (Edit tab → Music)');return}
+  if(!mReady()){toast('Music is not ready yet');return}
+  if(T().length&&!confirm('Replace the saved timing for this song?'))return;
+  st.rec=true;st.recBuf=[];st.pos=-1;st.detour=null;st.ov=null;showPos();
+  if(mType()==='clock')clock.reset();seekTo(0);play();render();
+}
+function recPush(){st.recBuf.push({t:mTime(),s:st.s,l:st.l,v:st.view==='line'?null:st.view,snap:{pos:st.pos,detour:st.detour?{...st.detour}:null,view:st.view}})}
+function recAct(name,arg){
+  if(name==='prev'){const last=st.recBuf.pop();if(last){st.pos=last.snap.pos;st.detour=last.snap.detour;showPos();const prev=st.recBuf[st.recBuf.length-1];if(prev&&prev.v)st.view=prev.v;if(!prev){st.pos=-1;st.detour=null;showPos()}else{st.pos=prev.snap.pos;st.detour=prev.snap.detour?{...prev.snap.detour}:null;showPos();if(prev.v)st.view=prev.v}}render();return}
+  if(name==='prevSec'){toast('While recording, use ← to undo instead');return}
+  if(name==='next')mNext();else if(name==='nextSec')mNextSec();else if(name==='jump'){if(!mJump(arg)){toast('No such section');return}}
+  else if(name==='repeat')mRepeat();else if(name==='end')mEnd();
+  recPush();render();
+}
+function recMark(v){st.view=v;recPush();render()}
+function recStop(){
+  const S=st.song;st.rec=false;
+  S.timeline=st.recBuf.map(e=>e.v?{t:+e.t.toFixed(2),v:e.v}:{t:+e.t.toFixed(2),s:e.s,l:e.l}).sort((a,b)=>a.t-b.t);
+  S.tlSig=S.sig;save();st.follow=true;st.tl=-2;toast(`Saved ${S.timeline.length} timing cues`);render();renderLib();
+}
+
+/* ---------- tick ---------- */
+setInterval(()=>{
+  if(!st.song)return;
+  const k=mType();
+  if(k==='clock'){const c=$('#clk');if(c)c.textContent=fmt(clock.t)}
+  if(followActive()){
+    const t=mTime()+0.25+(st.song.offset||0);const A=T();
+    let j=-1;for(let i=0;i<A.length;i++){if(A[i].t<=t)j=i;else break}
+    if(st.hold){if(performance.now()<st.hold.until&&j<st.hold.j)j=st.hold.j;else st.hold=null}
+    if(j!==st.tl){applyEntry(j);renderStage();hiCue()}
+  }
+  $('#time').textContent=k==='none'?'Live':fmt(mTime())+(mDur()?' / '+fmt(mDur()):'');
+},100);
+setInterval(()=>{updTransport();updUpNext()},1000);
+
+/* ---------- keyboard ---------- */
+function onKey(e){
+  const tg=e.target;const tag=(tg&&tg.tagName)||'';
+  if(e.key==='Escape'){$('#help').classList.remove('show');$('#nsModal').classList.remove('show');if(/INPUT|TEXTAREA|SELECT/.test(tag))tg.blur();return}
+  if(e.key==='Enter'&&tag==='INPUT'&&tg.closest&&tg.closest('#cue')){tg.blur();e.preventDefault();return}
+  if(/INPUT|TEXTAREA|SELECT/.test(tag)||tg?.isContentEditable)return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key;let done=true;
+  if(st.slide&&!/^(?: |ArrowRight|ArrowDown|PageDown|ArrowLeft|ArrowUp|PageUp|Backspace|n|N|f|F|\?|k|K|\.|-|=|\+)$/.test(k))return;
+  if(st.slide&&/^[-=+]$/.test(k))return;
+  if(k===' '||k==='ArrowRight'||k==='PageDown')act('next');
+  else if(k==='ArrowLeft'||k==='PageUp'||k==='Backspace')act('prev');
+  else if(k==='ArrowDown')act('nextSec');else if(k==='ArrowUp')act('prevSec');
+  else if(k==='C')act('jump',isType('pre'));
+  else if(k==='c')act('jump',isType('chorus'));
+  else if(/^[1-9]$/.test(k))act('jump',isType('verse',+k));
+  else if(k==='b'||k==='B')act('jump',isType('bridge'));
+  else if(k==='i'||k==='I')act('jump',isType('intro'));
+  else if(k==='r'||k==='R')act('repeat');
+  else if(k==='e'||k==='E')act('end');
+  else if(k==='t'||k==='T')setOverlay('title');
+  else if(k==='k'||k==='K'||k==='.')setOverlay('blank');
+  else if(k==='Enter'){playPause();if(mType()==='clock')updMediaPanel()}
+  else if(k==='s'||k==='S'){st.rec?recStop():recStart()}
+  else if(k==='p'||k==='P')toggleFollow();
+  else if(k==='[')nudge(-0.1);else if(k===']')nudge(0.1);
+  else if(k==='='||k==='+')fsize(0.05);else if(k==='-'||k==='_')fsize(-0.05);
+  else if(k==='n')stepItem(1);else if(k==='N')stepItem(-1);
+  else if(k==='f'||k==='F')presentHere();
+  else if(k==='?')$('#help').classList.toggle('show');
+  else done=false;
+  if(done){e.preventDefault();e.stopPropagation()}
+}
+window.addEventListener('keydown',onKey,true);
+document.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>{const a=document.activeElement;if(a&&a.tagName==='BUTTON')a.blur()},0)});
+function toggleFollow(){st.follow=!st.follow;if(!st.follow)syncPosFromView();else st.tl=-2;render()}
+function nudge(d){const S=st.song;S.offset=Math.round(((S.offset||0)+d)*100)/100;save();updTransport()}
+function fsize(d){const S=st.song;S.fs=Math.min(1.5,Math.max(0.6,Math.round(((S.fs||1)+d)*100)/100));save();renderStage();if(!$('#edit').hidden)$('#eFs').value=S.fs}
+function presentHere(){const w=$('#stagewrap');if(document.fullscreenElement)document.exitFullscreen();else w.requestFullscreen&&w.requestFullscreen().catch(()=>toast('Full screen was refused'))}
+
+
+/* ---------- load song ---------- */
+async function loadSong(id,fromSession){
+  const S=songById(id);if(!S)return;
+  st.slide=null;$('#live').classList.remove('slide-mode');
+  if(!fromSession){const Z=curSess();st.itemIdx=Z?Z.items.findIndex(it=>it.type==='song'&&it.id===id):-1}
+  if(st.rec)st.rec=false;
+  pause();
+  st.song=S;db.last=id;save();st.bg=resolveBg(S);
+  st.view='title';st.ov=null;st.pos=-1;st.detour=null;st.tl=-2;st.hold=null;st.follow=true;
+  buildSeq();clock.reset();
+  aud.pause();if(audURL){URL.revokeObjectURL(audURL);audURL=null}aud.removeAttribute('src');aud.load();
+  clearTimeout(st.hfT);
+  if(S.media.type==='audio'){let blob=await folderAudio(S);if(!blob)blob=await idbGet('audio:'+S.id);if(blob&&st.song===S){audURL=URL.createObjectURL(blob);aud.src=audURL;
+    if(fromSession&&hfOn()){toast('Hands-free: music starts in 3 seconds');st.hfT=setTimeout(()=>{if(st.song===S&&!mPlaying())play()},3000)}}}
+  $('#songName').textContent=S.title+(S.artist?' · '+S.artist:'');updSpot();
+  buildCue();updMediaPanel();renderLib();if(!$('#edit').hidden)fillEdit();render();
+}
+
+/* ---------- library & setlist ---------- */
+function badges(S){const b=[];if(S.lang==='id')b.push('ID');const m={audio:'Audio',clock:'Spotify clock',none:'Live'}[S.media.type];b.push(m);if(S.timeline?.length)b.push('timed');if(!S.sections.length)b.push('needs lyrics');return b.join(' · ')}
+function renderLib(){
+  const q=$('#q').value.trim().toLowerCase();
+  const L=db.songs.filter(s=>!q||(s.title+' '+s.artist).toLowerCase().includes(q)).sort((a,b)=>a.title.localeCompare(b.title));
+  $('#lib').innerHTML=L.map(s=>`<div class="item${s.id===st.song?.id?' on':''}" data-id="${esc(s.id)}"><div class="nm"><b>${esc(s.title)}</b><small>${esc(s.artist||'—')} · ${esc(badges(s))}</small></div><button data-add="${esc(s.id)}" title="Add to the worship session">+ Add</button></div>`).join('')||'<div class="empty">No songs found.</div>';
+  renderSess();
+}
+$('#q').addEventListener('input',renderLib);
+$('#lib').addEventListener('click',e=>{const a=e.target.closest('[data-add]');if(a){addItem('song',a.dataset.add);return}const it=e.target.closest('.item');if(it)loadSong(it.dataset.id)});
+
+$('#btnNew').onclick=openNewSong;
+$('#cue').addEventListener('click',e=>{const li=e.target.closest('.li');if(!li)return;const i=+li.dataset.i,s=+li.dataset.s,l=+li.dataset.l;
+  if(st.rec)return;st.ov=null;
+  if(followActive()){const A=T();let best=-1,bd=1e9;const now=mTime();A.forEach((x,j)=>{if(!x.v&&x.s===s&&x.l===l){const d=Math.abs(x.t-now);if(d<bd){bd=d;best=j}}});
+    if(best>=0)tGo(best);else toast('That line is not in the recorded timing')}
+  else{st.pos=i;st.detour=null;showPos()}
+  render()});
+$('#chips').addEventListener('click',e=>{const b=e.target.closest('button');if(b)act('jump',isSec(+b.dataset.k))});
+
+/* ---------- edit tab ---------- */
+function showTab(t){$('#live').hidden=t!=='live';$('#edit').hidden=t!=='edit';$('#tabLive').classList.toggle('on',t==='live');$('#tabEdit').classList.toggle('on',t==='edit');if(t==='edit')fillEdit()}
+$('#tabLive').onclick=()=>showTab('live');$('#tabEdit').onclick=()=>{if(st.slide||!st.song){toast('Choose a song to edit (click one in the library)');return}showTab('edit')};
+function fillEdit(){
+  const S=st.song;if(!S)return;
+  $('#eTitle').value=S.title;$('#eArtist').value=S.artist;$('#eLang').value=S.lang||'en';$('#eSrc').value=S.src||'';
+  $('#eSpot').value=S.spotify||'';$('#eSpotFind').href=spotifySearch(S);
+  $('#eSrcOpen').href=S.src||'#';$('#eSrcOpen').style.visibility=S.src?'visible':'hidden';
+  $('#eLyrics').value=S.lyrics;$('#eOrder').value=S.orderText;$('#eOrderErr').textContent='';
+  document.querySelectorAll('input[name=mt]').forEach(r=>r.checked=r.value===S.media.type);
+  
+  $('#eAudioName').textContent=S.media.audioName?('Saved: '+S.media.audioName):'';
+  $('#eFs').value=S.fs||1;$('#eLines').value=String([4,6,99].includes(S.lines)?S.lines:99);
+  showMediaFields();fillStruct();fillBgEdit();fileHint();
+}
+function fillStruct(){
+  const S=st.song;const opts=[['verse','Verse / Bait'],['chorus','Chorus / Reff'],['pre','Pre-chorus'],['post','Post-chorus'],['bridge','Bridge'],['intro','Intro'],['end','Ending'],['tag','Tag'],['inst','Instrumental'],['other','Other']];
+  $('#eStruct').innerHTML=S.sections.length?'<tr><th>Code</th><th>Name</th><th>Type</th><th>Lines</th></tr>'+S.sections.map((x,i)=>`<tr><td class="c">${esc(x.code)}</td><td>${esc(x.name)}</td><td><select data-ty="${i}">${opts.map(([v,n])=>`<option value="${v}"${v===x.type?' selected':''}>${n}</option>`).join('')}</select></td><td>${x.lines.length}</td></tr>`).join(''):'<tr><td class="empty">Paste lyrics to see sections.</td></tr>';
+}
+function showMediaFields(){const t=st.song.media.type;$('#eMediaAudio').hidden=t!=='audio';$('#eMediaClock').hidden=t!=='clock'}
+function changed(rebuild){save();renderLib();$('#songName').textContent=st.song.title+(st.song.artist?' · '+st.song.artist:'');if(rebuild){buildSeq();buildCue();st.pos=Math.min(st.pos,st.seq.length);if(st.view==='line'&&!st.song.sections[st.s])st.view='title'}render()}
+$('#eTitle').addEventListener('input',e=>{st.song.title=e.target.value||'Untitled song';changed();updSpot();$('#eSpotFind').href=spotifySearch(st.song)});
+$('#eArtist').addEventListener('input',e=>{st.song.artist=e.target.value;changed();updSpot();$('#eSpotFind').href=spotifySearch(st.song)});
+$('#eLang').addEventListener('change',e=>{st.song.lang=e.target.value;reparse(st.song);fillEdit();changed(true)});
+$('#eSrc').addEventListener('input',e=>{st.song.src=e.target.value.trim();$('#eSrcOpen').href=st.song.src||'#';$('#eSrcOpen').style.visibility=st.song.src?'visible':'hidden';changed()});
+let lyrT;$('#eLyrics').addEventListener('input',e=>{clearTimeout(lyrT);lyrT=setTimeout(()=>{st.song.lyrics=e.target.value;reparse(st.song);$('#eOrder').value=st.song.orderText;$('#eOrderErr').textContent='';fillStruct();changed(true)},350)});
+$('#eStruct').addEventListener('change',e=>{const s=e.target.closest('[data-ty]');if(!s)return;const x=st.song.sections[+s.dataset.ty];x.type=s.value;if(x.type!=='verse'){x.num=null;x.autoNum=false}recode(st.song);$('#eOrder').value=st.song.orderText;fillStruct();changed(true)});
+$('#eOrder').addEventListener('change',e=>{
+  const S=st.song;const map={};S.sections.forEach((x,i)=>map[x.code.toUpperCase()]=i);
+  const out=[],bad=[];e.target.value.split(/[\s,]+/).filter(Boolean).forEach(tok=>{const m=tok.toUpperCase().match(/^(.+?)(?:\*(\d))?$/);const i=map[m[1]];if(i==null)bad.push(tok);else for(let r=0;r<(+m[2]||1);r++)out.push(i)});
+  if(bad.length){$('#eOrderErr').textContent='Unknown code: '+bad.join(', ')+'. Use the codes in the table above.';return}
+  $('#eOrderErr').textContent='';S.order=out;S.orderText=out.map(i=>S.sections[i].code).join(' ');e.target.value=S.orderText;changed(true)});
+$('#eOrderReset').onclick=()=>{reparse(st.song);$('#eOrder').value=st.song.orderText;$('#eOrderErr').textContent='';fillStruct();changed(true)};
+$('#eMedia').addEventListener('change',e=>{if(e.target.name!=='mt')return;st.song.media.type=e.target.value;showMediaFields();save();loadSong(st.song.id)});
+$('#eSpot').addEventListener('change',e=>{st.song.spotify=e.target.value.trim();save();updSpot();updMediaPanel();renderSess()});
+$('#eAudio').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const S=st.song;await idbPut('audio:'+S.id,f);S.media.audioName=f.name;if(FS.dir){try{await saveAudioToFolder(S,f,f.name);toast('Audio copied into the songs folder')}catch(err){toast('Could not copy audio into the folder')}}else toast('Audio saved in this browser');save();loadSong(S.id);e.target.value=''});
+$('#fBg').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const img=new Image();const u=URL.createObjectURL(f);img.onload=async()=>{const sc=Math.min(1,1920/img.width);const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);customBg=c.toDataURL('image/jpeg',0.85);URL.revokeObjectURL(u);await idbPut('bg',customBg);if(FS.dir)c.toBlob(b=>{if(b)fsWrite('_background.jpg',b).catch(()=>{})},'image/jpeg',0.85);db.defScene='image';save();fillDefaults();bgChanged();toast('Image saved. Songs set to Default now use it.')};img.onerror=()=>toast('Could not read that image');img.src=u;e.target.value=''});
+$('#eFs').addEventListener('input',e=>{st.song.fs=+e.target.value;changed()});
+$('#eLines').addEventListener('change',e=>{st.song.lines=+e.target.value;changed()});
+$('#eDup').onclick=()=>{if(!st.song)return;const S=JSON.parse(JSON.stringify(st.song));S.id=uid();S.title+=' (copy)';if(S.media.type==='audio'){S.media.type='none';S.media.audioName=''}db.songs.push(S);save();loadSong(S.id)};
+$('#eDel').onclick=()=>{if(!confirm(FS.dir?`Delete “${st.song.title}”? Its text file will be moved to the _trash folder inside your songs folder, so you can restore it later.`:`Delete “${st.song.title}”? This cannot be undone (unless you exported a backup).`))return;const id=st.song.id;idbDel('audio:'+id);db.songs=db.songs.filter(s=>s.id!==id);db.sessions.forEach(Z=>Z.items=Z.items.filter(it=>!(it.type==='song'&&it.id===id)));if(!db.songs.length){const S=newSong();reparse(S);db.songs.push(S)}save();showTab('live');loadSong(db.songs[0].id)};
+
+/* ---------- background settings ---------- */
+const palOpts=(withRandom)=>(withRandom?'<option value="random">Random colors</option>':'')+Object.entries(PALS).map(([k,p])=>`<option value="${k}">${p.n}</option>`).join('');
+const sceneOpts=(isSong)=>(isSong?'<option value="default">Default (sidebar)</option>':'')+'<option value="random">Random scene</option>'+Object.entries(SCENES).map(([k,n])=>`<option value="${k}">${n}</option>`).join('')+`<option value="image">My image${customBg?'':' (upload in sidebar)'}</option>`;
+let prevSpec=null,defSpec=null;
+function fillDefaults(){$('#dScene').innerHTML=sceneOpts(false);$('#dPal').innerHTML=palOpts(true);$('#dScene').value=db.defScene||'random';$('#dPal').value=db.defPal||'random';$('#dPal').disabled=db.defScene==='image';$('#dAnim').checked=db.anim!==false;defSpec=resolveBg({bgScene:db.defScene,bgPal:db.defPal});paintBg($('#dBgPrev'),defSpec)}
+function fillBgEdit(){const S=st.song;if(!S)return;$('#eScene').innerHTML=sceneOpts(true);$('#ePal').innerHTML=palOpts(true);$('#eScene').value=S.bgScene||'default';$('#ePal').value=S.bgPal||'random';$('#ePal').disabled=['default','image'].includes(S.bgScene);paintBg($('#eBgPrev'),st.bg)}
+function bgChanged(){st.bg=resolveBg(st.song);if(!$('#edit').hidden)fillBgEdit();renderStage()}
+$('#eScene').addEventListener('change',e=>{st.song.bgScene=e.target.value;save();bgChanged()});
+$('#ePal').addEventListener('change',e=>{st.song.bgPal=e.target.value;save();bgChanged()});
+$('#eShuffle').onclick=()=>{bgChanged()};
+$('#dScene').addEventListener('change',e=>{if(e.target.value==='image'&&!customBg){$('#fBg').click();e.target.value=db.defScene||'random';return}db.defScene=e.target.value;save();fillDefaults();if((st.song?.bgScene||'default')==='default')bgChanged()});
+$('#dPal').addEventListener('change',e=>{db.defPal=e.target.value;save();fillDefaults();if((st.song?.bgScene||'default')==='default')bgChanged()});
+$('#dAnim').addEventListener('change',e=>{db.anim=e.target.checked;save();fillDefaults();if(!$('#edit').hidden)fillBgEdit();renderStage()});
+$('#dImg').onclick=()=>$('#fBg').click();
+
+/* ---------- import / export ---------- */
+$('#btnExport').onclick=()=>{const data=JSON.stringify({app:'worship-lyrics',v:1,exported:new Date().toISOString(),songs:db.songs,sessions:db.sessions},null,1);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='worship-songs-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
+$('#btnImport').onclick=()=>$('#fImport').click();
+$('#fImport').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{const j=JSON.parse(t);if(!j||!Array.isArray(j.songs))throw 0;let n=0;
+  j.songs.forEach(s=>{if(!s||!s.id||typeof s.title!=='string')return;const S=newSong(s);S.media=Object.assign({type:'none',yt:'',link:'',audioName:''},s.media||{});if(S.media.type==='audio'||S.media.type==='youtube')S.media.type='none';S.media.yt='';if(!Array.isArray(S.sections)||!S.sections.length)reparse(S);const i=db.songs.findIndex(x=>x.id===S.id);if(i>=0)db.songs[i]=S;else db.songs.push(S);n++});
+  if(Array.isArray(j.sessions))j.sessions.forEach(Z=>{if(!Z||!Array.isArray(Z.items))return;const i=db.sessions.findIndex(x=>x.id===Z.id);if(i>=0)db.sessions[i]=Z;else db.sessions.push(Z)});
+  save();renderLib();toast(`Imported ${n} song${n===1?'':'s'}`);if(st.song)loadSong(st.song.id)}).catch(()=>toast('That file is not a song library export'));e.target.value=''});
+
+/* ---------- top buttons ---------- */
+$('#btnTV').onclick=openTV;$('#btnFS').onclick=presentHere;
+$('#btnHelp').onclick=()=>$('#help').classList.add('show');$('#helpClose').onclick=()=>$('#help').classList.remove('show');
+$('#help').addEventListener('click',e=>{if(e.target.id==='help')$('#help').classList.remove('show')});
+$('#btnPlay').onclick=()=>{playPause();if(mType()==='clock')updMediaPanel()};
+$('#btnRec').onclick=()=>st.rec?recStop():recStart();
+$('#btnFollow').onclick=toggleFollow;
+$('#nudgeM').onclick=()=>nudge(-0.1);$('#nudgeP').onclick=()=>nudge(0.1);
+window.addEventListener('beforeunload',()=>{try{if(tv&&!tv.closed)tv.close()}catch(e){}});
+
+/* ---------- worship sessions & slides ---------- */
+const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const spotifySearch=S=>'https://open.spotify.com/search/'+encodeURIComponent(((S?.title||'')+' '+(S?.artist||'')).trim());
+const spotifyUrl=S=>S?.spotify||(/spotify\.com/.test(S?.media?.link||'')?S.media.link:'')||spotifySearch(S);
+function updSpot(){const a=$('#spotLink');if(!st.song||st.slide){a.style.display='none';return}a.style.display='';a.href=spotifyUrl(st.song);a.textContent=st.song.spotify?'♫ Practice on Spotify ↗':'♫ Search on Spotify ↗'}
+const IT={welcome:{n:'Welcome screen',ic:'W',def:'Welcome'},song:{n:'Song',ic:'♪'},prayer:{n:'Prayer',ic:'P',def:'Prayer'},sharing:{n:'Sharing',ic:'S',def:'Sharing'},requests:{n:'Prayer requests',ic:'R',def:'Prayer Requests'}};
+function newItem(type,extra){return Object.assign({type,id:null,ref:'',title:'',name:'',requests:[]},extra||{})}
+function templateSession(songIds){return{id:uid(),name:'Home Family Caregroup',date:todayISO(),items:[newItem('welcome'),...(songIds||[]).map(id=>newItem('song',{id})),newItem('prayer'),newItem('sharing'),newItem('requests')]}}
+const sortedSessions=()=>db.sessions.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.name.localeCompare(b.name));
+function curSess(){return db.sessions.find(z=>z.id===db.curSess)||sortedSessions()[0]||null}
+function itemLabel(it,short){if(it.type==='song'){const S=songById(it.id);return S?S.title:'Missing song: '+(it.ref||'?')}
+  if(it.type==='welcome')return 'Welcome'+(it.title&&it.title!=='Welcome'?': '+it.title:'');
+  if(it.type==='prayer')return (it.title||'Prayer')+(!short&&it.name?' · '+it.name:'');
+  if(it.type==='sharing')return 'Sharing: '+(it.title||'(add a title)')+(!short&&it.name?' · '+it.name:'');
+  return (it.title||'Prayer Requests')+(it.requests.length?` (${it.requests.length})`:'')}
+function fmtDate(iso,lang){if(!iso)return'';const d=new Date(iso+'T12:00:00');if(isNaN(d))return iso;try{return d.toLocaleDateString(lang==='id'?'id-ID':'en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}catch(e){return iso}}
+function slideModel(it){
+  const Z=curSess();const head=esc(it.title||IT[it.type].def);
+  if(it.type==='welcome'){const lang=/selamat|datang/i.test(it.title)?'id':'en';return{html:`<div class="ct"><div class="ttl slide"><p class="kick">${head}</p><h1>${esc(Z?.name||'')}</h1><p>${esc(fmtDate(Z?.date,lang))}</p></div></div>`}}
+  if(it.type==='prayer')return{html:`<div class="ct"><div class="ttl slide"><h1>${head}</h1>${it.name?`<p>${esc(it.name)}</p>`:''}</div></div>`};
+  if(it.type==='sharing')return{html:`<div class="ct"><div class="ttl slide"><p class="kick">Sharing</p><h1>${esc(it.title||'Sharing')}</h1>${it.name?`<p class="who">${esc(it.name)}</p>`:''}</div></div>`};
+  const R=it.requests.filter(Boolean);
+  return{n:Math.max(R.length,1),html:`<div class="ct"><div class="ttl slide"><h1 style="font-size:4.6cqw">${head}</h1>${R.length?`<ul class="req">${R.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:''}</div></div>`};
+}
+const hfOn=()=>{try{return localStorage.getItem(LS+'.hf')==='1'}catch(e){return false}};
+function hasNextItem(){const Z=curSess();return!!Z&&st.itemIdx>=0&&st.itemIdx<Z.items.length-1}
+function stepItem(d){const Z=curSess();if(!Z||!Z.items.length)return;let i=st.itemIdx<0?(d>0?0:Z.items.length-1):st.itemIdx+d;if(i<0||i>=Z.items.length){toast(i<0?'This is the first item':'End of the session');return}goItem(i)}
+async function goItem(i){
+  const Z=curSess();const it=Z?.items[i];if(!it)return;st.itemIdx=i;
+  if(it.type==='song'){if(songById(it.id)){await loadSong(it.id,true)}else{toast('Song not found: '+(it.ref||''))}renderSess();return}
+  if(st.rec)st.rec=false;pause();st.slide=it;st.song=null;st.ov=null;st.bg=resolveBg(null);
+  $('#live').classList.add('slide-mode');if(!$('#edit').hidden)showTab('live');
+  $('#songName').textContent=IT[it.type].n;updSpot();buildCue();renderLib();renderStage();
+}
+function slideEditor(){
+  const it=st.slide,Z=curSess();const f=(id,label,val,ph)=>`<label for="${id}">${label}</label><input type="text" id="${id}" value="${esc(val)}" placeholder="${esc(ph||'')}">`;
+  let h=`<div class="slideed"><h3>${esc(IT[it.type].n)}</h3>`;
+  if(it.type==='welcome')h+=f('sfTitle','Heading',it.title,'Welcome')+f('sfGroup','Group name',Z.name,'Home Family Caregroup')+`<label for="sfDate">Date</label><input type="date" id="sfDate" value="${esc(Z.date)}">`;
+  if(it.type==='prayer')h+=f('sfTitle','Heading',it.title,'Prayer')+f('sfName','Led by (optional)',it.name,'Name');
+  if(it.type==='sharing')h+=f('sfTitle','Sharing title',it.title,"e.g. God's faithfulness")+f('sfName','Name',it.name,'Who is sharing');
+  if(it.type==='requests')h+=f('sfTitle','Heading',it.title,'Prayer Requests')+`<label for="sfReq">Prayer requests (one per line)</label><textarea class="small" id="sfReq" placeholder="One request per line">${esc(it.requests.join('\n'))}</textarea>`;
+  return h+`<p class="hint">Changes show on the screen right away. Press <kbd>Esc</kbd> (or <kbd>Enter</kbd>) to leave a field, then <kbd>Space</kbd> or <kbd>N</kbd> goes to the next item.</p></div>`;
+}
+$('#cue').addEventListener('input',e=>{const it=st.slide;if(!it)return;const Z=curSess();const v=e.target.value;
+  if(e.target.id==='sfTitle')it.title=v;else if(e.target.id==='sfName')it.name=v;else if(e.target.id==='sfReq')it.requests=v.split('\n').map(x=>x.trim()).filter(Boolean);
+  else if(e.target.id==='sfGroup'){Z.name=v;$('#sessName').value=v}else if(e.target.id==='sfDate'){Z.date=v;$('#sessDate').value=v}
+  save();renderStage();renderSess(true)});
+function addItem(type,songId){
+  const Z=curSess();if(!Z){toast('Create a session first');return}
+  if(type==='song'){const id=songId||st.song?.id;if(!id){toast('Open a song first');return}
+    let at=-1;Z.items.forEach((x,i)=>{if(x.type==='song')at=i});if(at<0)at=Z.items.findIndex(x=>x.type==='welcome');
+    Z.items.splice(at+1,0,newItem('song',{id}));if(st.itemIdx>at)st.itemIdx++;if(st.song?.id===id&&!st.slide)st.itemIdx=at+1;toast('Added “'+(songById(id)?.title||'')+'” to the session')}
+  else{let at=st.itemIdx>=0?st.itemIdx+1:Z.items.findIndex(x=>x.type==='requests');if(at<0)at=Z.items.length;Z.items.splice(at,0,newItem(type));if(st.itemIdx>=at)st.itemIdx++}
+  save();renderSess();
+}
+function renderSess(lite){
+  const Z=curSess();const L=sortedSessions();
+  if(!lite){$('#sessSel').innerHTML=L.map(z=>`<option value="${esc(z.id)}">${esc(z.date||'')} · ${esc(z.name)}</option>`).join('')||'<option>No sessions</option>';if(Z)$('#sessSel').value=Z.id;
+    $('#sessName').value=Z?.name||'';$('#sessDate').value=Z?.date||''}
+  $('#set').innerHTML=Z?Z.items.map((it,i)=>{const S=it.type==='song'?songById(it.id):null;
+    return `<div class="item${i===st.itemIdx?' on':''}" data-i="${i}"><span class="ic">${IT[it.type].ic}</span><div class="nm"><b>${esc(itemLabel(it,true))}</b>${(it.type==='sharing'||it.type==='prayer')&&it.name?`<small>${esc(it.name)}</small>`:''}</div>${S?`<a class="sp" href="${esc(spotifyUrl(S))}" target="_blank" rel="noopener" title="Open in Spotify">♫</a>`:''}<button data-up="${i}" aria-label="Move up">↑</button><button data-dn="${i}" aria-label="Move down">↓</button><button data-rm="${i}" aria-label="Remove">✕</button></div>`}).join('')||'<div class="empty">Empty. Add items below.</div>':'';
+  const f=Z&&FS.sfiles[Z.id];$('#sessFile').textContent=FS.dir?(f?'Saved as sessions/'+f.name:'Saving to the sessions folder…'):'Saved in this browser.';
+}
+$('#set').addEventListener('click',e=>{if(e.target.closest('a'))return;const Z=curSess();if(!Z)return;const b=e.target.closest('button');const L=Z.items;
+  if(b){const i=+(b.dataset.up??b.dataset.dn??b.dataset.rm);
+    if(b.dataset.up!=null&&i>0){[L[i-1],L[i]]=[L[i],L[i-1]];if(st.itemIdx===i)st.itemIdx--;else if(st.itemIdx===i-1)st.itemIdx++}
+    else if(b.dataset.dn!=null&&i<L.length-1){[L[i+1],L[i]]=[L[i],L[i+1]];if(st.itemIdx===i)st.itemIdx++;else if(st.itemIdx===i+1)st.itemIdx--}
+    else if(b.dataset.rm!=null){L.splice(i,1);if(st.itemIdx===i)st.itemIdx=-1;else if(st.itemIdx>i)st.itemIdx--}
+    save();renderSess();return}
+  const it=e.target.closest('.item');if(it){showTab('live');goItem(+it.dataset.i)}});
+$('#sessSel').addEventListener('change',e=>{e.target.blur();db.curSess=e.target.value;st.itemIdx=-1;save();renderSess()});
+$('#sessName').addEventListener('input',e=>{const Z=curSess();if(!Z)return;Z.name=e.target.value;save();renderSess(true);if(st.slide)renderStage()});
+$('#sessName').addEventListener('change',()=>renderSess());
+$('#sessDate').addEventListener('change',e=>{const Z=curSess();if(!Z)return;Z.date=e.target.value;save();renderSess();if(st.slide)renderStage()});
+$('#sessNew').onclick=()=>{const prev=curSess();const Z=templateSession([]);if(prev)Z.name=prev.name;db.sessions.push(Z);db.curSess=Z.id;st.itemIdx=-1;save();renderSess();toast('New session created. Add songs with “+ Add” in the library.')};
+$('#sessDel').onclick=()=>{const Z=curSess();if(!Z)return;if(!confirm(`Delete the session “${Z.date} · ${Z.name}”?${FS.dir?' Its file will be moved to the _trash folder.':''} Songs are not deleted.`))return;db.sessions=db.sessions.filter(z=>z!==Z);if(!db.sessions.length)db.sessions.push(templateSession([]));db.curSess=sortedSessions()[0].id;st.itemIdx=-1;save();renderSess()};
+$('#hf').addEventListener('change',e=>{try{localStorage.setItem(LS+'.hf',e.target.checked?'1':'0')}catch(err){}toast(e.target.checked?'Hands-free on (works with audio-file songs)':'Hands-free off')});
+$('#sessAdd').addEventListener('change',e=>{const v=e.target.value;e.target.value='';e.target.blur();if(v)addItem(v)});
+$('#sessPractice').onclick=()=>{const Z=curSess();if(!Z)return;const songs=Z.items.filter(it=>it.type==='song').map(it=>songById(it.id)).filter(Boolean);
+  if(!songs.length){toast('No songs in this session yet');return}
+  const txt=`${Z.name} · ${fmtDate(Z.date)}\nSongs to practice:\n\n`+songs.map((S,i)=>`${i+1}. ${S.title}${S.artist?' – '+S.artist:''}\n   ${spotifyUrl(S)}`).join('\n');
+  navigator.clipboard.writeText(txt).then(()=>toast('Practice list copied. Paste it in WhatsApp or email.'),()=>toast('Could not copy to the clipboard'))};
+/* new song dialog */
+function openNewSong(){['nsTitle','nsArtist','nsSpot','nsLyrics'].forEach(id=>$('#'+id).value='');$('#nsLang').value='en';$('#nsAdd').checked=!!curSess();
+  $('#nsWhere').textContent=FS.dir?`Creates a text file in your songs folder “${FS.dir.name}”.`:'Saved in this browser (choose a songs folder in the sidebar to save as files).';
+  updNsFind();$('#nsModal').classList.add('show');setTimeout(()=>$('#nsTitle').focus(),50)}
+function updNsFind(){$('#nsFind').href=spotifySearch({title:$('#nsTitle').value,artist:$('#nsArtist').value})}
+$('#nsTitle').addEventListener('input',updNsFind);$('#nsArtist').addEventListener('input',updNsFind);
+$('#nsClose').onclick=()=>$('#nsModal').classList.remove('show');
+$('#nsCreate').onclick=async()=>{const title=$('#nsTitle').value.trim();if(!title){toast('Please enter a title');$('#nsTitle').focus();return}
+  const S=newSong({title,artist:$('#nsArtist').value.trim(),lang:$('#nsLang').value,spotify:$('#nsSpot').value.trim(),lyrics:$('#nsLyrics').value});reparse(S);db.songs.push(S);
+  if($('#nsAdd').checked&&curSess())addItem('song',S.id);
+  $('#nsModal').classList.remove('show');save();if(FS.dir)await flushFolder();await loadSong(S.id);
+  toast(FS.dir&&FS.files[S.id]?`Created “${FS.files[S.id].name}” in your songs folder`:'Song created')};
+/* session text files */
+function fileBase(S){return FS.files[S.id]?FS.files[S.id].name.replace(/\.txt$/i,''):safeName(S.title+(S.artist?' - '+S.artist:''))}
+function resolveRef(ref){const r=String(ref||'').replace(/\.txt$/i,'').trim().toLowerCase();if(!r)return null;
+  return db.songs.find(S=>fileBase(S).toLowerCase()===r)||db.songs.find(S=>(S.title+(S.artist?' - '+S.artist:'')).toLowerCase()===r)||db.songs.find(S=>S.title.toLowerCase()===r)||null}
+function sessToText(Z){const L=['Session: '+Z.name,'Date: '+Z.date,''];const two=(a,b)=>(a||'')+(b?' | '+b:'');
+  Z.items.forEach(it=>{
+    if(it.type==='welcome')L.push('Welcome'+(it.title?': '+it.title:''));
+    else if(it.type==='song'){const S=songById(it.id);L.push('Song: '+(S?fileBase(S):it.ref||''))}
+    else if(it.type==='prayer')L.push('Prayer'+(it.title||it.name?': '+two(it.title,it.name):''));
+    else if(it.type==='sharing')L.push('Sharing: '+two(it.title,it.name));
+    else{L.push('Prayer Requests'+(it.title?': '+it.title:':'));it.requests.forEach(r=>L.push('- '+r))}});
+  return L.join('\n')+'\n'}
+function textToSess(text,fname){
+  const L=String(text).replace(/^﻿/,'').replace(/\r/g,'').split('\n');const Z={id:uid(),name:'',date:'',items:[]};let i=0;
+  for(;i<L.length;i++){const t=L[i].trim();if(!t)continue;const m=t.match(/^(session|group|name|nama|kelompok|date|tanggal)\s*:\s*(.*)$/i);if(!m)break;if(/date|tanggal/i.test(m[1]))Z.date=m[2].trim();else Z.name=m[2].trim()}
+  for(;i<L.length;i++){const t=L[i].trim();if(!t)continue;
+    if(/^[-•*]\s*/.test(t)){let last=Z.items[Z.items.length-1];if(!last||last.type!=='requests'){last=newItem('requests');Z.items.push(last)}last.requests.push(t.replace(/^[-•*]\s*/,''));continue}
+    const m=t.match(/^(welcome|selamat datang|song|lagu|prayer requests?|pokok doa|prayer|doa|sharing|kesaksian)\b\s*:?\s*(.*)$/i);if(!m)continue;
+    const k=m[1].toLowerCase(),rest=m[2].trim(),[a,b]=rest.split(/\s*\|\s*/);
+    if(k==='song'||k==='lagu'){const S=resolveRef(rest);Z.items.push(newItem('song',{id:S?.id||null,ref:rest}))}
+    else if(k==='welcome'||k==='selamat datang')Z.items.push(newItem('welcome',{title:k==='selamat datang'&&!rest?'Selamat Datang':(rest||'')}));
+    else if(/requests?|pokok/.test(k))Z.items.push(newItem('requests',{title:rest}));
+    else if(k==='prayer'||k==='doa')Z.items.push(newItem('prayer',{title:a||'',name:b||''}));
+    else Z.items.push(newItem('sharing',{title:a||'',name:b||''}))}
+  const fm=fname.match(/^(\d{4}-\d{2}-\d{2})\s*-?\s*(.*?)\.txt$/i);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(Z.date)){const d=new Date(Z.date);Z.date=Z.date&&!isNaN(d)?d.toISOString().slice(0,10):(fm?fm[1]:todayISO())}
+  if(!Z.name)Z.name=(fm&&fm[2])||fname.replace(/\.txt$/i,'')||'Home Family Caregroup';
+  return Z}
+const sessKey=Z=>Z.date+'|'+Z.name;
+async function sessDir(create){try{return await FS.dir.getDirectoryHandle('sessions',{create:!!create})}catch(e){return null}}
+async function loadSessions(){FS.sfiles={};FS.swritten={};const out=[];const sd=await sessDir(false);
+  if(sd)for await(const [name,h] of sd.entries()){if(h.kind!=='file'||!/\.txt$/i.test(name)||/^[._~]/.test(name))continue;
+    try{const f=await h.getFile();const Z=textToSess(await f.text(),name);out.push(Z);FS.sfiles[Z.id]={name,mtime:f.lastModified,key:sessKey(Z)};FS.swritten[Z.id]=sessToText(Z)}catch(e){}}
+  db.sessions=out}
+async function flushSessions(){
+  if(!db.sessions.length&&!Object.keys(FS.sfiles).length)return;const sd=await sessDir(true);
+  const disk=new Set();for await(const [n,h] of sd.entries())if(h.kind==='file')disk.add(n.toLowerCase());
+  const owned=new Set(Object.values(FS.sfiles).map(f=>f.name.toLowerCase()));const taken=new Set([...disk].filter(n=>!owned.has(n)));const plan=[];
+  for(const Z of db.sessions){const f=FS.sfiles[Z.id];let n=f&&f.key===sessKey(Z)?f.name:null;if(n&&taken.has(n.toLowerCase()))n=null;if(n)taken.add(n.toLowerCase());plan.push([Z,n])}
+  for(const p of plan)if(!p[1]){const base=safeName((p[0].date||todayISO())+' - '+p[0].name);let n=base+'.txt',k=2;while(taken.has(n.toLowerCase()))n=base+' ('+(k++)+').txt';p[1]=n;taken.add(n.toLowerCase())}
+  for(const [Z,n] of plan){const f=FS.sfiles[Z.id];const text=sessToText(Z);
+    if(!f||f.name!==n||FS.swritten[Z.id]!==text){const fh=await fsWrite(n,text,sd);const mt=(await fh.getFile()).lastModified;if(f&&f.name!==n){try{await sd.removeEntry(f.name)}catch(e){}}FS.sfiles[Z.id]={name:n,mtime:mt,key:sessKey(Z)};FS.swritten[Z.id]=text}}
+  for(const id of Object.keys(FS.sfiles))if(!db.sessions.some(Z=>Z.id===id)){await trashEntry(sd,FS.sfiles[id].name);delete FS.sfiles[id];delete FS.swritten[id]}
+  renderSess(true);
+}
+async function refreshSessions(){const sd=await sessDir(false);if(!sd)return false;let any=false;const seen=new Set();const byName={};Object.entries(FS.sfiles).forEach(([id,f])=>byName[f.name]=id);
+  for await(const [name,h] of sd.entries()){if(h.kind!=='file'||!/\.txt$/i.test(name)||/^[._~]/.test(name))continue;seen.add(name);const f=await h.getFile();const id=byName[name];
+    if(!id){const Z=textToSess(await f.text(),name);db.sessions.push(Z);FS.sfiles[Z.id]={name,mtime:f.lastModified,key:sessKey(Z)};FS.swritten[Z.id]=sessToText(Z);any=true}
+    else if(f.lastModified>FS.sfiles[id].mtime+5){const Z=db.sessions.find(z=>z.id===id);const N=textToSess(await f.text(),name);if(Z){Z.name=N.name;Z.date=N.date;Z.items=N.items}FS.sfiles[id]={name,mtime:f.lastModified,key:sessKey(N)};FS.swritten[id]=sessToText(N);any=true;if(Z&&Z.id===db.curSess){st.itemIdx=-1;if(st.slide)st.slide=null}}}
+  for(const [id,f] of Object.entries({...FS.sfiles}))if(!seen.has(f.name)){db.sessions=db.sessions.filter(z=>z.id!==id);delete FS.sfiles[id];delete FS.swritten[id];any=true}
+  if(any&&!db.sessions.some(z=>z.id===db.curSess))db.curSess=sortedSessions()[0]?.id||null;return any}
+
+/* ---------- folder storage ---------- */
+const FS={dir:null,pending:null,files:{},written:{},sfiles:{},swritten:{},mwritten:{},dwritten:'',metaText:'',timer:null,busy:false,copyable:[],supported:'showDirectoryPicker' in window};
+const META='_worship-app.json';
+const LANGN={en:'English',id:'Indonesian',other:'Other'};
+const safeName=x=>String(x||'').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'').replace(/\s+/g,' ').trim().slice(0,80)||'Untitled song';
+const keyOf=S=>S.title+'|'+S.artist;
+async function trashEntry(dir,name){
+  try{const f=await (await dir.getFileHandle(name)).getFile();const td=await FS.dir.getDirectoryHandle('_trash',{create:true});const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');await fsWrite(stamp+' '+name,f,td)}catch(e){}
+  try{await dir.removeEntry(name)}catch(e){}}
+async function fsWrite(name,data,dir){const fh=await (dir||FS.dir).getFileHandle(name,{create:true});const w=await fh.createWritable();await w.write(data);await w.close();return fh}
+function songToText(S){const h=['Title: '+S.title];if(S.artist)h.push('Artist: '+S.artist);h.push('Language: '+(LANGN[S.lang]||'English'));if(S.spotify)h.push('Spotify: '+S.spotify);if(S.src)h.push('Source: '+S.src);return h.join('\n')+'\n\n'+String(S.lyrics||'').trim()+'\n'}
+function textToSong(text,fname){
+  const L=String(text).replace(/^﻿/,'').replace(/\r/g,'').split('\n');const h={};let i=0;
+  while(i<L.length){const m=L[i].match(/^\s*(title|judul|artist|artis|penyanyi|language|bahasa|source|sumber|spotify)\s*:\s*(.*)$/i);if(!m)break;h[m[1].toLowerCase()]=m[2].trim();i++}
+  if(i>0)while(i<L.length&&(!L[i].trim()||/^-{3,}$/.test(L[i].trim())))i++;
+  const lyrics=L.slice(i).join('\n').trim();const base=fname.replace(/\.txt$/i,'').replace(/ \(\d+\)$/,'');const parts=base.split(' - ');
+  const ht=h.title||h.judul;const title=ht||parts[0].trim()||'Untitled song';
+  const artist=h.artist||h.artis||h.penyanyi||(ht?'':parts.slice(1).join(' - ').trim());
+  const lg=(h.language||h.bahasa||'').toLowerCase();
+  const lang=/indo|^id$|bahasa/.test(lg)?'id':/eng|^en$|inggris/.test(lg)?'en':lg?'other':(/^\s*(bait|reff?)\b/im.test(lyrics)?'id':'en');
+  return{title,artist,lang,src:h.source||h.sumber||'',spotify:h.spotify||'',lyrics};
+}
+function metaSig(S){const m=songMeta(S);delete m.mUpdated;return JSON.stringify(m)}
+const defSig=()=>JSON.stringify({defScene:db.defScene,defPal:db.defPal,anim:db.anim!==false});
+function songMeta(S){return{mUpdated:S.mUpdated||0,id:S.id,title:S.title,order:S.orderText,types:S.sections.map(x=>x.type),timeline:S.timeline,tlSig:S.tlSig,offset:S.offset,fs:S.fs,lines:S.lines,bgScene:S.bgScene,bgPal:S.bgPal,media:{type:S.media.type,link:S.media.link||'',audioFile:S.media.audioFile||'',audioName:S.media.audioName||''}}}
+function applyMeta(S,m,keepId){
+  if(!m)return;if(!keepId&&m.id)S.id=m.id;
+  if(Array.isArray(m.types)&&m.types.length===S.sections.length){m.types.forEach((t,i)=>{const x=S.sections[i];if(t&&t!==x.type){x.type=t;if(t!=='verse'){x.num=null;x.autoNum=false}}});recode(S)}
+  if(m.order){const r=parseOrder(S,m.order);if(!r.bad.length&&r.out.length){S.order=r.out;S.orderText=r.out.map(i=>S.sections[i].code).join(' ')}}
+  ['timeline','tlSig','offset','fs','lines','bgScene','bgPal'].forEach(k=>{if(m[k]!=null)S[k]=m[k]});
+  if(m.mUpdated)S.mUpdated=m.mUpdated;
+  if(m.media)S.media=Object.assign({type:'none',yt:'',link:'',audioName:'',audioFile:''},m.media);if(S.media.type==='youtube')S.media.type='none';
+}
+async function readMeta(){try{const t=await (await (await FS.dir.getFileHandle(META)).getFile()).text();return{text:t,json:JSON.parse(t)}}catch(e){return null}}
+async function scanTxt(){const out=[];for await(const [name,h] of FS.dir.entries())if(h.kind==='file'&&/\.txt$/i.test(name)&&!/^[._~]/.test(name))out.push(h);return out}
+function buildMeta(){const songs={};db.songs.forEach(S=>{const f=FS.files[S.id];if(f)songs[f.name]=songMeta(S)});
+  return{app:'worship-lyrics',v:1,note:'Settings for the Worship Lyrics app (timing, order, backgrounds). Lyrics are in the .txt files; sessions are in the sessions folder.',defaults:{defScene:db.defScene,defPal:db.defPal,anim:db.anim!==false,updated:db.defUpdated||0},songs}}
+async function songFromHandle(h,meta,used,names){
+  const f=await h.getFile();const d=textToSong(await f.text(),h.name);const S=newSong(d);reparse(S);
+  let mk=meta.songs&&meta.songs[h.name]?h.name:null;
+  if(!mk&&meta.songs){mk=Object.keys(meta.songs).find(n=>!used.has(n)&&!names.has(n)&&(meta.songs[n].title||'').toLowerCase()===d.title.toLowerCase())||null}
+  if(mk){used.add(mk);applyMeta(S,meta.songs[mk])}
+  if(FS.files[S.id])S.id=uid();
+  FS.files[S.id]={name:h.name,mtime:f.lastModified,key:keyOf(S)};FS.written[S.id]=songToText(S);FS.mwritten[S.id]=metaSig(S);
+  return S;
+}
+async function loadFromFolder(){
+  const m=await readMeta();const meta=m?m.json:{songs:{},setlist:[],defaults:{}};
+  const handles=await scanTxt();const names=new Set(handles.map(h=>h.name)),used=new Set();
+  FS.files={};FS.written={};FS.mwritten={};const songs=[];
+  for(const h of handles){try{songs.push(await songFromHandle(h,meta,used,names))}catch(e){console.warn('skip',h.name,e)}}
+  db.songs=songs;const byName={};songs.forEach(S=>byName[FS.files[S.id].name]=S.id);
+  await loadSessions();
+  if(!db.sessions.length&&songs.length){const ids=(meta.setlist||[]).map(n=>byName[n]).filter(Boolean);db.sessions=[templateSession(ids)]}
+  let sn='';try{sn=localStorage.getItem(LS+'.sess')||''}catch(e){}
+  db.curSess=(Object.entries(FS.sfiles).find(([id,f])=>f.name===sn)||[])[0]||sortedSessions()[0]?.id||null;
+  const D=meta.defaults||{};if(D.defScene)db.defScene=D.defScene;if(D.defPal)db.defPal=D.defPal;if(D.anim!=null)db.anim=D.anim;db.defUpdated=D.updated||0;FS.dwritten=defSig();
+  try{const bf=await (await FS.dir.getFileHandle('_background.jpg')).getFile();customBg=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=()=>r(customBg);fr.readAsDataURL(bf)})}catch(e){}
+  FS.metaText=m?m.text:'';
+  try{db.last=localStorage.getItem(LS+'.last')||db.last}catch(e){}
+}
+function schedule(){clearTimeout(FS.timer);FS.timer=setTimeout(flushFolder,1200)}
+async function flushFolder(){
+  FS.timer=null;if(!FS.dir)return;if(FS.busy){schedule();return}FS.busy=true;
+  try{
+    const disk=new Set((await scanTxt()).map(h=>h.name.toLowerCase()));
+    const owned=new Set(Object.values(FS.files).map(f=>f.name.toLowerCase()));
+    const taken=new Set([...disk].filter(n=>!owned.has(n)));const plan=[];
+    for(const S of db.songs){const f=FS.files[S.id];let name=f&&f.key===keyOf(S)?f.name:null;if(name&&taken.has(name.toLowerCase()))name=null;if(name)taken.add(name.toLowerCase());plan.push([S,name])}
+    for(const p of plan)if(!p[1]){const base=safeName(p[0].title+(p[0].artist?' - '+p[0].artist:''));let n=base+'.txt',k=2;while(taken.has(n.toLowerCase()))n=base+' ('+(k++)+').txt';p[1]=n;taken.add(n.toLowerCase())}
+    for(const [S,name] of plan){const f=FS.files[S.id];const text=songToText(S);
+      if(!f||f.name!==name||FS.written[S.id]!==text){const fh=await fsWrite(name,text);const mt=(await fh.getFile()).lastModified;
+        if(f&&f.name!==name){try{await FS.dir.removeEntry(f.name)}catch(e){}}
+        FS.files[S.id]={name,mtime:mt,key:keyOf(S)};FS.written[S.id]=text}}
+    for(const id of Object.keys(FS.files))if(!db.songs.some(S=>S.id===id)){await trashEntry(FS.dir,FS.files[id].name);delete FS.files[id];delete FS.written[id]}
+    await flushSessions();
+    // merge with what other laptops may have written since we last read it
+    const dm=await readMeta();const dj=dm?dm.json:{songs:{},defaults:{}};let curChanged=false;
+    for(const S of db.songs){const f=FS.files[S.id];if(!f)continue;const sig=metaSig(S),d=dj.songs&&dj.songs[f.name];
+      if(sig!==FS.mwritten[S.id])S.mUpdated=Date.now();
+      else if(d&&(d.mUpdated||0)>(S.mUpdated||0)){applyMeta(S,d,true);if(S===st.song)curChanged=true}
+      FS.mwritten[S.id]=metaSig(S)}
+    const dd=dj.defaults||{};
+    if(defSig()!==FS.dwritten)db.defUpdated=Date.now();
+    else if((dd.updated||0)>(db.defUpdated||0)){if(dd.defScene)db.defScene=dd.defScene;if(dd.defPal)db.defPal=dd.defPal;if(dd.anim!=null)db.anim=dd.anim;db.defUpdated=dd.updated;fillDefaults()}
+    FS.dwritten=defSig();
+    const onDisk=new Set((await scanTxt()).map(h=>h.name));const out=buildMeta();
+    Object.entries(dj.songs||{}).forEach(([n,m])=>{if(!out.songs[n]&&onDisk.has(n)&&!Object.values(FS.files).some(f=>f.name===n))out.songs[n]=m});
+    const mt=JSON.stringify(out,null,1);if(mt!==FS.metaText){await fsWrite(META,mt);FS.metaText=mt}
+    if(curChanged&&!mPlaying()){buildSeq();buildCue();render()}
+    setFsStatus();fileHint();
+  }catch(e){console.error(e);toast('Could not save to the songs folder'+(e&&e.name==='NotAllowedError'?' (permission was revoked; click Reconnect)':''));if(e&&e.name==='NotAllowedError'){FS.pending=FS.dir;FS.dir=null;setFsStatus()}}
+  finally{FS.busy=false}
+}
+async function saveAudioToFolder(S,blob,orig){
+  const ad=await FS.dir.getDirectoryHandle('audio',{create:true});const ext=((orig||'').match(/\.[a-z0-9]{2,4}$/i)||['.mp3'])[0].toLowerCase();
+  const base=safeName(S.title+(S.artist?' - '+S.artist:''));let n=base+ext,k=2;
+  const others=new Set(db.songs.filter(x=>x!==S).map(x=>(x.media.audioFile||'').replace(/^audio\//,'').toLowerCase()));
+  while(others.has(n.toLowerCase()))n=base+' ('+(k++)+')'+ext;
+  await fsWrite(n,blob,ad);S.media.audioFile='audio/'+n;
+}
+async function folderAudio(S){if(!FS.dir||!S.media.audioFile)return null;try{const ad=await FS.dir.getDirectoryHandle('audio');return await (await ad.getFileHandle(S.media.audioFile.replace(/^audio\//,''))).getFile()}catch(e){return null}}
+let browserDb=null;
+async function connectDir(h){
+  if(!FS.dir&&!browserDb)browserDb=JSON.parse(JSON.stringify(db));
+  FS.dir=h;FS.pending=null;await idbPut('dir',h);
+  try{await loadFromFolder()}catch(e){console.error(e);toast('Could not read that folder');FS.dir=null;FS.pending=h;setFsStatus();return}
+  const fromBrowser=(browserDb?.songs||[]).filter(b=>!db.songs.some(S=>S.title.toLowerCase()===b.title.toLowerCase()&&S.artist.toLowerCase()===(b.artist||'').toLowerCase()));
+  if(!db.songs.length&&fromBrowser.length){await copyBrowserSongs(fromBrowser,true)}
+  else FS.copyable=fromBrowser;
+  setFsStatus();renderLib();fillDefaults();
+  if(db.songs.length)await loadSong(songById(db.last)?db.last:db.songs[0].id);
+  else{const S=newSong();reparse(S);db.songs.push(S);save();await loadSong(S.id)}
+}
+async function copyBrowserSongs(list,initial){
+  for(const b of list){const S=JSON.parse(JSON.stringify(b));if(db.songs.some(x=>x.id===S.id))S.id=uid();S.media=Object.assign({type:'none',yt:'',link:'',audioName:'',audioFile:''},S.media);
+    if(S.media.type==='audio'&&!S.media.audioFile){const blob=await idbGet('audio:'+b.id);if(blob){try{await saveAudioToFolder(S,blob,S.media.audioName);await idbPut('audio:'+S.id,blob)}catch(e){}}}
+    db.songs.push(S)}
+  if(initial&&browserDb&&Array.isArray(browserDb.sessions)&&browserDb.sessions.length){db.sessions=JSON.parse(JSON.stringify(browserDb.sessions));db.curSess=browserDb.curSess||db.sessions[0].id}
+  FS.copyable=[];await flushFolder();renderLib();toast(`Copied ${list.length} song${list.length===1?'':'s'} into the folder`);
+}
+async function chooseFolder(){
+  if(!FS.supported){toast('Choosing a folder needs Chrome or Edge');return}
+  try{const h=await window.showDirectoryPicker({id:'worship-songs',mode:'readwrite'});await connectDir(h)}catch(e){if(e&&e.name!=='AbortError')toast('Could not open that folder')}
+}
+async function reconnect(){const h=FS.pending;if(!h)return;try{const p=h.requestPermission?await h.requestPermission({mode:'readwrite'}):'granted';if(p==='granted')await connectDir(h);else toast('Permission was not granted')}catch(e){toast('Could not reconnect. Choose the folder again.')}}
+async function disconnect(){
+  if(FS.timer){clearTimeout(FS.timer);await flushFolder()}
+  FS.dir=null;FS.pending=null;FS.files={};FS.written={};FS.sfiles={};FS.swritten={};FS.mwritten={};FS.dwritten='';FS.copyable=[];idbDel('dir');
+  try{const j=JSON.parse(localStorage.getItem(LS)||'null');db={songs:[],sessions:[],curSess:null,last:null};if(j&&Array.isArray(j.songs))db=Object.assign(db,j)}catch(e){}
+  browserDb=null;if(!db.songs.length)seed();customBg=await idbGet('bg');
+  setFsStatus();renderLib();fillDefaults();await loadSong(songById(db.last)?db.last:db.songs[0].id);toast('Now using songs saved in this browser');
+}
+async function refreshFolder(){
+  if(!FS.dir||FS.busy||FS.timer||st.rec)return;FS.busy=true;let changedCur=false,any=false;
+  try{
+    const handles=await scanTxt();const names=new Set(handles.map(h=>h.name));const m=await readMeta();const meta=m?m.json:{songs:{}};
+    const byName={};Object.entries(FS.files).forEach(([id,f])=>byName[f.name]=id);
+    for(const h of handles){const id=byName[h.name];const f=await h.getFile();
+      if(!id){const S=await songFromHandle(h,meta,new Set(),names);db.songs.push(S);any=true}
+      else if(f.lastModified>FS.files[id].mtime+5){const old=songById(id);const d=textToSong(await f.text(),h.name);const keep=songMeta(old);Object.assign(old,d);reparse(old);applyMeta(old,keep,true);
+        FS.files[id]={name:h.name,mtime:f.lastModified,key:keyOf(old)};FS.written[id]=songToText(old);any=true;if(old===st.song)changedCur=true}}
+    for(const [id,f] of Object.entries({...FS.files}))if(!names.has(f.name)){{const gone=songById(id);db.sessions.forEach(Z=>Z.items.forEach(it=>{if(it.type==='song'&&it.id===id){it.ref=f.name.replace(/\.txt$/i,'');it.id=null}}));}db.songs=db.songs.filter(S=>S.id!==id);delete FS.files[id];delete FS.written[id];any=true;if(st.song?.id===id)changedCur='gone'}
+    if(m&&m.text!==FS.metaText){FS.metaText=m.text;db.songs.forEach(S=>{const f=FS.files[S.id];const mm=f&&meta.songs?.[f.name];if(mm&&(mm.mUpdated||0)>=(S.mUpdated||0)){applyMeta(S,mm,true);FS.mwritten[S.id]=metaSig(S);if(S===st.song)changedCur=true}});
+      any=true}
+    if(await refreshSessions())any=true;
+  }catch(e){console.warn(e)}finally{FS.busy=false}
+  if(any){renderLib();setFsStatus();
+    if(changedCur==='gone'){if(db.songs.length)loadSong(db.songs[0].id)}
+    else if(st.slide){renderStage();buildCue()}
+    else if(changedCur&&!mPlaying()){buildSeq();buildCue();if(!$('#edit').hidden)fillEdit();render()}}
+}
+window.addEventListener('focus',()=>setTimeout(refreshFolder,300));
+function fileHint(){const e=$('#eFile');if(!e||!st.song)return;const f=FS.files[st.song.id];e.textContent=FS.dir?(f?`Saved in your songs folder as “${f.name}”.`:'Saving to your songs folder…'):'Saved in this browser only. Choose a songs folder in the sidebar to keep it as a file.'}
+function setFsStatus(){
+  const st2=$('#fsStatus'),b=$('#fsBtns'),hint=$('#fsHint');
+  if(FS.dir){st2.innerHTML=`Songs folder: <b>${esc(FS.dir.name)}</b> · ${Object.keys(FS.files).length} song files`;
+    b.innerHTML=(FS.copyable.length?`<button data-act="copy" class="pri">Copy ${FS.copyable.length} song${FS.copyable.length===1?'':'s'} from this browser</button>`:'')+'<button data-act="reload">Reload</button><button data-act="choose">Change…</button><button data-act="disc">Disconnect</button>';
+    hint.textContent='Every change is saved to the folder automatically. Files added or edited by others appear when you switch back to this window.'}
+  else if(FS.pending){st2.innerHTML=`Songs folder: <b>${esc(FS.pending.name)}</b> (needs permission)`;b.innerHTML='<button data-act="recon" class="pri">Reconnect folder</button><button data-act="disc">Use browser instead</button>';hint.textContent='Chrome asks again each time the file is opened. Click Reconnect, then Allow.'}
+  else if(!FS.supported){st2.textContent='Saved in this browser only.';b.innerHTML='';hint.textContent='Open this file in Chrome or Edge to save songs into a folder (for example Google Drive).'}
+  else{st2.textContent='Saved in this browser only.';b.innerHTML='<button data-act="choose" class="pri">Choose songs folder…</button>';hint.textContent='Pick a folder in Google Drive, Dropbox or iCloud Drive. Each song becomes a text file, and the library follows the folder to any laptop.'}
+}
+$('#fsBtns').addEventListener('click',e=>{const a=e.target.closest('[data-act]')?.dataset.act;if(!a)return;
+  if(a==='choose')chooseFolder();else if(a==='recon')reconnect();else if(a==='disc')disconnect();
+  else if(a==='reload'){FS.timer?flushFolder().then(()=>connectDir(FS.dir)):connectDir(FS.dir)}else if(a==='copy')copyBrowserSongs(FS.copyable,false)});
+window.__wlConnect=connectDir;
+
+/* ---------- boot ---------- */
+(async()=>{
+  try{const j=JSON.parse(localStorage.getItem(LS)||'null');if(j&&Array.isArray(j.songs)&&j.songs.length)db=Object.assign(db,j)}catch(e){}
+  if(!db.songs.length)seed();
+  if(!Array.isArray(db.sessions)||!db.sessions.length){db.sessions=[templateSession((db.setlist||[]).filter(songById))];db.curSess=db.sessions[0].id}delete db.setlist;
+  db.songs.forEach(s=>{if(s.spotify==null){s.spotify=/spotify\.com/.test(s.media?.link||'')?s.media.link:''}});
+  db.songs.forEach(s=>{if(!Array.isArray(s.sections))reparse(s);s.media=Object.assign({type:'none',yt:'',link:'',audioName:''},s.media||{});if(s.media.type==='youtube'){s.media.type='none';s.timeline=[]}if(!s.v2){s.lines=99;s.v2=1}if(!s.v3){s.bgScene=s.bg==='image'?'image':'default';s.bgPal='random';delete s.bg;delete s.motion;s.v3=1}s.media.yt='';s.timeline=s.timeline||[]});save();
+  if(!db.defScene)db.defScene='random';if(!db.defPal)db.defPal='random';
+  await idbOpen();customBg=await idbGet('bg');fillDefaults();
+  renderLib();setFsStatus();$('#hf').checked=hfOn();updKbd();
+  await loadSong(songById(db.last)?db.last:db.songs[0].id);
+  const h=await idbGet('dir');
+  if(h&&FS.supported!==null){let p='prompt';try{p=h.queryPermission?await h.queryPermission({mode:'readwrite'}):'granted'}catch(e){}
+    if(p==='granted')await connectDir(h);else{FS.pending=h;setFsStatus()}}
+  if(!localStorage.getItem(LS+'.seenHelp')){$('#help').classList.add('show');try{localStorage.setItem(LS+'.seenHelp','1')}catch(e){}}
+})();
+}
+</script>
+</body>
+</html>
