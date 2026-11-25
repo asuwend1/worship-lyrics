@@ -170,6 +170,9 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
 .stage .who{font-size:3.2cqw!important;margin-top:3cqh!important;opacity:.95!important;font-weight:600}
 .stage .slide h1{font-size:calc(6.4cqw * var(--fit,1))}
 .stage .req{list-style:none;padding:0;margin:3.5cqh auto 0;text-align:left;max-width:80cqw;font-size:calc(min(3.6cqw, 58cqh / (var(--n,4) * 1.55)) * var(--fit,1));line-height:1.3;text-shadow:0 .2cqw .8cqw rgba(0,0,0,.6)}
+.stage .passage{font-size:calc(min(4.2cqw, 62cqh / (var(--n,4) * 1.5)) * var(--fit,1));line-height:1.45;font-weight:500;max-width:84cqw;margin:0;text-align:left;text-shadow:0 .2cqw .8cqw rgba(0,0,0,.65);text-wrap:pretty}
+.stage .passage sup{font-size:.55em;color:#ffce54;font-weight:700;margin:0 .2em 0 .35em;vertical-align:.55em}
+.stage .req.ann b{font-weight:700}.stage .req.ann span{opacity:.85}
 .stage .req li{margin:.8cqh 0;padding-left:1.3em;position:relative}
 .stage .req li::before{content:'';position:absolute;left:.25em;top:.5em;width:.4em;height:.4em;border-radius:50%;background:#ffce54}
 .bgprev{width:100%;max-width:340px;border-radius:8px;margin-top:8px}
@@ -191,7 +194,7 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
 </head>
 <body>
 <header class="top">
-  <h1>Worship <span>Lyrics</span> <small style="font-size:12px;color:var(--mute);font-weight:400" title="App version">v1.7.0</small></h1>
+  <h1>Worship <span>Lyrics</span> <small style="font-size:12px;color:var(--mute);font-weight:400" title="App version">v1.8.0</small></h1>
   <button id="btnTV" title="Open a separate window to drag onto the TV">Open TV window</button>
   <button id="btnFS" title="Full screen on this screen (F)">Present here <kbd>F</kbd></button>
   <button id="btnHelp">Help <kbd>?</kbd></button>
@@ -208,7 +211,7 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
       <div class="row"><select id="sessSel" style="flex:1" aria-label="Choose session"></select><button id="sessNew">+ New</button></div>
       <div class="sessgrid"><input type="text" id="sessName" aria-label="Group name" placeholder="Home Family Caregroup"><input type="date" id="sessDate" aria-label="Date"></div>
       <div class="list" id="set"></div>
-      <select id="sessAdd" style="margin-top:6px" aria-label="Add to session"><option value="">+ Add to session…</option><option value="song">Current song</option><option value="welcome">Welcome screen</option><option value="prayer">Prayer</option><option value="sharing">Sharing</option><option value="requests">Prayer requests</option></select>
+      <select id="sessAdd" style="margin-top:6px" aria-label="Add to session"><option value="">+ Add to session…</option><option value="song">Current song</option><option value="welcome">Welcome screen</option><option value="prayer">Prayer</option><option value="sharing">Sharing</option><option value="bible">Bible reading</option><option value="announce">Announcements</option><option value="requests">Prayer requests</option></select>
       <label style="display:flex;gap:8px;align-items:flex-start;color:var(--ink);margin:8px 0 0;font-size:13px"><input type="checkbox" id="hf" style="margin-top:3px"> Hands-free: start the audio when a song comes up, and move on to the next item when it ends</label>
       <div class="row" style="margin-top:6px"><button id="sessPractice" title="Copy the song list with Spotify links">Copy practice list</button><button id="sessDel">Delete session</button></div>
       <p class="hint" id="sessFile"></p>
@@ -351,7 +354,7 @@ Without labels, blank lines split the parts, and a part that comes back is treat
 </div>
 
 <div class="modal" id="help"><div class="card">
-  <div class="row" style="justify-content:space-between"><h2 style="font-size:18px;color:var(--ink);margin:0">How to use it <small style="font-weight:400;color:var(--mute)">· version 1.7.0</small></h2><button id="helpClose">Close <kbd>Esc</kbd></button></div>
+  <div class="row" style="justify-content:space-between"><h2 style="font-size:18px;color:var(--ink);margin:0">How to use it <small style="font-weight:400;color:var(--mute)">· version 1.8.0</small></h2><button id="helpClose">Close <kbd>Esc</kbd></button></div>
   <h3>1 · Add a song</h3>
   <ol><li><b>+ New song</b>, then paste the lyrics into the <b>Edit song</b> tab. Sections like Verse, Chorus, Bait and Reff are detected automatically.</li>
   <li>Check the <b>song order</b>. Genius usually lists the full order already; fix it if your group sings it differently.</li>
@@ -366,8 +369,8 @@ Without labels, blank lines split the parts, and a part that comes back is treat
   <p><code>Title: Bersyukur</code><br><code>Artist: ...</code><br><code>Language: Indonesian</code><br><br><code>Bait 1:</code> … <code>Reff:</code> …</p>
   <p>Deleted songs and sessions go to a <code>_trash</code> subfolder, so nothing is lost by accident. The app picks up new and changed files whenever you switch back to its window. Without a folder, songs are saved in this browser only.</p>
   <h3>Worship sessions</h3>
-  <p>A session is the run-sheet for one meeting: Welcome screen (group name and date), songs, Prayer, Sharing (title and name) and Prayer Requests. Click any item to show it, press <kbd>N</kbd> for the next item, or keep pressing <kbd>Space</kbd>: after the last line of a song it moves on to the next item. With a songs folder, each session is saved as a text file in a <code>sessions</code> subfolder, for example:</p>
-  <p><code>Session: Home Family Caregroup</code><br><code>Date: 2026-11-28</code><br><br><code>Welcome</code><br><code>Song: Give Thanks - Don Moen</code><br><code>Prayer: Opening prayer | Budi</code><br><code>Sharing: God's faithfulness | Nadya</code><br><code>Prayer Requests:</code><br><code>- Healing for ...</code></p>
+  <p>A session is the run-sheet for one meeting: Welcome screen (group name and date), songs, Prayer, Bible reading (reference, optional passage text shown page by page), Sharing (title and name), Announcements and Prayer Requests. Click any item to show it, press <kbd>N</kbd> for the next item, or keep pressing <kbd>Space</kbd>: after the last line of a song it moves on to the next item. With a songs folder, each session is saved as a text file in a <code>sessions</code> subfolder, for example:</p>
+  <p><code>Session: Home Family Caregroup</code><br><code>Date: 2026-11-28</code><br><br><code>Welcome</code><br><code>Song: Give Thanks - Don Moen</code><br><code>Prayer: Opening prayer | Budi</code><br><code>Bible: Psalm 23:1-3 | WEB</code><br><code>&gt; 1 The LORD is my shepherd…</code><br><code>Sharing: God's faithfulness | Nadya</code><br><code>Announcements:</code><br><code>- Christmas service - Dec 24, 7 PM</code><br><code>Prayer Requests:</code><br><code>- Healing for ...</code></p>
   <h3>3 · During worship</h3>
   <ol><li>Connect the laptop to the TV. Then either click <b>Open TV window</b> and drag it onto the TV (double-click it for full screen), or mirror the screen and press <kbd>F</kbd>.</li>
   <li>Press <kbd>Enter</kbd> to start the music. Any key overrides: during a recording, <kbd>C</kbd> or <kbd>R</kbd> moves the music too, so you can sing the chorus one more time.</li>
@@ -762,7 +765,10 @@ document.addEventListener('focusin',updKbd);document.addEventListener('focusout'
 
 /* ---------- actions ---------- */
 function act(name,arg){
-  if(st.slide){if(name==='next'||name==='nextSec')stepItem(1);else if(name==='prev'||name==='prevSec')stepItem(-1);return}
+  if(st.slide){const it=st.slide;const np=it.type==='bible'?passagePages(it.text).length:0;
+    if(name==='next'&&np>1&&(st.slidePage||0)<np-1){st.slidePage=(st.slidePage||0)+1;renderStage();return}
+    if(name==='prev'&&np>1&&(st.slidePage||0)>0){st.slidePage--;renderStage();return}
+    if(name==='next'||name==='nextSec')stepItem(1);else if(name==='prev'||name==='prevSec')stepItem(-1);return}
   if(!st.song)return;
   if((name==='next'||name==='nextSec')&&!st.rec&&!followActive()&&!st.detour&&st.pos>=st.seq.length&&hasNextItem()){stepItem(1);return}
   if(st.rec)return recAct(name,arg);
@@ -979,8 +985,8 @@ const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMo
 const spotifySearch=S=>'https://open.spotify.com/search/'+encodeURIComponent(((S?.title||'')+' '+(S?.artist||'')).trim());
 const spotifyUrl=S=>S?.spotify||(/spotify\.com/.test(S?.media?.link||'')?S.media.link:'')||spotifySearch(S);
 function updSpot(){const a=$('#spotLink');if(!st.song||st.slide){a.style.display='none';return}a.style.display='';a.href=spotifyUrl(st.song);a.textContent=st.song.spotify?'♫ Practice on Spotify ↗':'♫ Search on Spotify ↗'}
-const IT={welcome:{n:'Welcome screen',ic:'W',def:'Welcome'},song:{n:'Song',ic:'♪'},prayer:{n:'Prayer',ic:'P',def:'Prayer'},sharing:{n:'Sharing',ic:'S',def:'Sharing'},requests:{n:'Prayer requests',ic:'R',def:'Prayer Requests'}};
-function newItem(type,extra){return Object.assign({type,id:null,ref:'',title:'',name:'',requests:[]},extra||{})}
+const IT={bible:{n:'Bible reading',ic:'B',def:'Bible Reading'},announce:{n:'Announcements',ic:'A',def:'Announcements'},welcome:{n:'Welcome screen',ic:'W',def:'Welcome'},song:{n:'Song',ic:'♪'},prayer:{n:'Prayer',ic:'P',def:'Prayer'},sharing:{n:'Sharing',ic:'S',def:'Sharing'},requests:{n:'Prayer requests',ic:'R',def:'Prayer Requests'}};
+function newItem(type,extra){return Object.assign({type,id:null,ref:'',title:'',name:'',text:'',requests:[]},extra||{})}
 function templateSession(songIds){return{id:uid(),name:'Home Family Caregroup',date:todayISO(),items:[newItem('welcome'),...(songIds||[]).map(id=>newItem('song',{id})),newItem('prayer'),newItem('sharing'),newItem('requests')]}}
 const sortedSessions=()=>db.sessions.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.name.localeCompare(b.name));
 function curSess(){return db.sessions.find(z=>z.id===db.curSess)||sortedSessions()[0]||null}
@@ -988,6 +994,8 @@ function itemLabel(it,short){if(it.type==='song'){const S=songById(it.id);return
   if(it.type==='welcome')return 'Welcome'+(it.title&&it.title!=='Welcome'?': '+it.title:'');
   if(it.type==='prayer')return (it.title||'Prayer')+(!short&&it.name?' · '+it.name:'');
   if(it.type==='sharing')return 'Sharing: '+(it.title||'(add a title)')+(!short&&it.name?' · '+it.name:'');
+  if(it.type==='bible')return 'Bible: '+(it.title||'(add a reference)')+(!short&&it.name?' · '+it.name:'');
+  if(it.type==='announce')return (it.title||'Announcements')+(it.requests.length?` (${it.requests.length})`:'');
   return (it.title||'Prayer Requests')+(it.requests.length?` (${it.requests.length})`:'')}
 function fmtDate(iso,lang){if(!iso)return'';const d=new Date(iso+'T12:00:00');if(isNaN(d))return iso;try{return d.toLocaleDateString(lang==='id'?'id-ID':'en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}catch(e){return iso}}
 function slideModel(it){
@@ -995,16 +1003,28 @@ function slideModel(it){
   if(it.type==='welcome'){const lang=/selamat|datang/i.test(it.title)?'id':'en';return{html:`<div class="ct"><div class="ttl slide"><p class="kick">${head}</p><h1>${esc(Z?.name||'')}</h1><p>${esc(fmtDate(Z?.date,lang))}</p></div></div>`}}
   if(it.type==='prayer')return{html:`<div class="ct"><div class="ttl slide"><h1>${head}</h1>${it.name?`<p>${esc(it.name)}</p>`:''}</div></div>`};
   if(it.type==='sharing')return{html:`<div class="ct"><div class="ttl slide"><p class="kick">Sharing</p><h1>${esc(it.title||'Sharing')}</h1>${it.name?`<p class="who">${esc(it.name)}</p>`:''}</div></div>`};
+  if(it.type==='bible'){const pages=passagePages(it.text);const ref=esc(it.title||'Bible Reading');
+    if(!pages.length)return{html:`<div class="ct"><div class="ttl slide"><p class="kick">Bible Reading</p><h1>${ref}</h1>${it.name?`<p>${esc(it.name)}</p>`:''}</div></div>`};
+    const pg=Math.min(st.slidePage||0,pages.length-1);
+    const body=pages[pg].map(v=>{const m=v.match(/^(\d{1,3})[\s.:)]\s*(.*)$/);return m?`<sup>${m[1]}</sup>${esc(m[2])}`:esc(v)}).join(' ');
+    return{n:Math.max(3,Math.ceil(pages[pg].join(' ').length/60)),html:`<div class="sec">${ref}${it.name?' · '+esc(it.name):''}${pages.length>1?` <span style="opacity:.6">${pg+1}/${pages.length}</span>`:''}</div><div class="ct"><p class="passage">${body}</p></div>`}}
+  if(it.type==='announce'){const R=it.requests.filter(Boolean);
+    return{n:Math.max(R.length,1),html:`<div class="ct"><div class="ttl slide"><h1 style="font-size:4.6cqw">${head}</h1>${R.length?`<ul class="req ann">${R.map(r=>{const [a,b]=r.split(/\s+[—–-]\s+|\s*\|\s*/);return `<li><b>${esc(a)}</b>${b?`<span> — ${esc(b)}</span>`:''}</li>`}).join('')}</ul>`:''}</div></div>`}}
   const R=it.requests.filter(Boolean);
   return{n:Math.max(R.length,1),html:`<div class="ct"><div class="ttl slide"><h1 style="font-size:4.6cqw">${head}</h1>${R.length?`<ul class="req">${R.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:''}</div></div>`};
 }
 const hfOn=()=>{try{return localStorage.getItem(LS+'.hf')==='1'}catch(e){return false}};
+function passagePages(text){
+  const raw=String(text||'').replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean);if(!raw.length)return[];
+  let units=[];raw.forEach(line=>{if(line.length<=260)units.push(line);else line.split(/(?<=[.!?;:])\s+/).forEach(x=>{if(x)units.push(x)})});
+  const pages=[];let cur=[],len=0;const MAX=300;
+  units.forEach(u=>{if(cur.length&&len+u.length>MAX){pages.push(cur);cur=[];len=0}cur.push(u);len+=u.length+1});if(cur.length)pages.push(cur);return pages}
 function hasNextItem(){const Z=curSess();return!!Z&&st.itemIdx>=0&&st.itemIdx<Z.items.length-1}
-function stepItem(d){const Z=curSess();if(!Z||!Z.items.length)return;let i=st.itemIdx<0?(d>0?0:Z.items.length-1):st.itemIdx+d;if(i<0||i>=Z.items.length){toast(i<0?'This is the first item':'End of the session');return}goItem(i)}
-async function goItem(i){
+function stepItem(d){const Z=curSess();if(!Z||!Z.items.length)return;let i=st.itemIdx<0?(d>0?0:Z.items.length-1):st.itemIdx+d;if(i<0||i>=Z.items.length){toast(i<0?'This is the first item':'End of the session');return}goItem(i,d<0)}
+async function goItem(i,fromEnd){
   const Z=curSess();const it=Z?.items[i];if(!it)return;st.itemIdx=i;
   if(it.type==='song'){if(songById(it.id)){await loadSong(it.id,true)}else{toast('Song not found: '+(it.ref||''))}renderSess();return}
-  if(st.rec)st.rec=false;pause();st.slide=it;st.song=null;st.ov=null;st.bg=resolveBg(null);
+  if(st.rec)st.rec=false;pause();st.slidePage=fromEnd&&it.type==='bible'?Math.max(0,passagePages(it.text).length-1):0;st.slide=it;st.song=null;st.ov=null;st.bg=resolveBg(null);
   $('#live').classList.add('slide-mode');if(!$('#edit').hidden)showTab('live');
   $('#songName').textContent=IT[it.type].n;updSpot();buildCue();renderLib();renderStage();
 }
@@ -1014,13 +1034,24 @@ function slideEditor(){
   if(it.type==='welcome')h+=f('sfTitle','Heading',it.title,'Welcome')+f('sfGroup','Group name',Z.name,'Home Family Caregroup')+`<label for="sfDate">Date</label><input type="date" id="sfDate" value="${esc(Z.date)}">`;
   if(it.type==='prayer')h+=f('sfTitle','Heading',it.title,'Prayer')+f('sfName','Led by (optional)',it.name,'Name');
   if(it.type==='sharing')h+=f('sfTitle','Sharing title',it.title,"e.g. God's faithfulness")+f('sfName','Name',it.name,'Who is sharing');
+  if(it.type==='bible')h+=f('sfTitle','Reference',it.title,'e.g. John 3:16-17 or Mazmur 23')+f('sfName','Translation (optional)',it.name,'e.g. NIV, TB, WEB')
+    +`<div class="row" style="margin-top:8px"><button id="sfFetch" type="button">Get text (World English Bible)</button><button id="sfFetchK" type="button">Get text (KJV)</button></div><p class="hint">Fills in public-domain English text from bible-api.com (needs internet). For other translations (NIV, Terjemahan Baru…), paste the passage below.</p>`
+    +`<label for="sfText">Passage text (optional: one verse per line, starting with its number). Long passages are split into pages; <kbd>Space</kbd> turns the page.</label><textarea class="small" id="sfText" style="min-height:160px" placeholder="16 For God so loved the world…&#10;17 For God did not send…">${esc(it.text)}</textarea>`;
+  if(it.type==='announce')h+=f('sfTitle','Heading',it.title,'Announcements')+`<label for="sfReq">Announcements (one per line, optional details after “ - ”)</label><textarea class="small" id="sfReq" placeholder="Christmas service - Dec 24, 7 PM&#10;Potluck next week - bring a dish">${esc(it.requests.join('\n'))}</textarea>`;
   if(it.type==='requests')h+=f('sfTitle','Heading',it.title,'Prayer Requests')+`<label for="sfReq">Prayer requests (one per line)</label><textarea class="small" id="sfReq" placeholder="One request per line">${esc(it.requests.join('\n'))}</textarea>`;
   return h+`<p class="hint">Changes show on the screen right away. Press <kbd>Esc</kbd> (or <kbd>Enter</kbd>) to leave a field, then <kbd>Space</kbd> or <kbd>N</kbd> goes to the next item.</p></div>`;
 }
 $('#cue').addEventListener('input',e=>{const it=st.slide;if(!it)return;const Z=curSess();const v=e.target.value;
-  if(e.target.id==='sfTitle')it.title=v;else if(e.target.id==='sfName')it.name=v;else if(e.target.id==='sfReq')it.requests=v.split('\n').map(x=>x.trim()).filter(Boolean);
+  if(e.target.id==='sfTitle')it.title=v;else if(e.target.id==='sfName')it.name=v;else if(e.target.id==='sfText'){it.text=v;st.slidePage=0}else if(e.target.id==='sfReq')it.requests=v.split('\n').map(x=>x.trim()).filter(Boolean);
   else if(e.target.id==='sfGroup'){Z.name=v;$('#sessName').value=v}else if(e.target.id==='sfDate'){Z.date=v;$('#sessDate').value=v}
   save();renderStage();renderSess(true)});
+$('#cue').addEventListener('click',async e=>{const b=e.target.closest('#sfFetch,#sfFetchK');if(!b||!st.slide)return;const it=st.slide;const ref=(it.title||'').trim();
+  if(!ref){toast('Type a reference first, e.g. John 3:16-17');return}const tr=b.id==='sfFetchK'?'kjv':'web';b.disabled=true;
+  try{const r=await fetch('https://bible-api.com/'+encodeURIComponent(ref)+'?translation='+tr);if(!r.ok)throw new Error(r.status);const j=await r.json();
+    if(!Array.isArray(j.verses)||!j.verses.length)throw new Error('none');
+    it.text=j.verses.map(v=>v.verse+' '+String(v.text).replace(/\s+/g,' ').trim()).join('\n');it.name=tr==='kjv'?'KJV':'WEB';if(j.reference)it.title=j.reference;
+    st.slidePage=0;save();buildCue();renderStage();renderSess(true);toast('Passage added: '+(j.reference||ref))}
+  catch(err){toast('Could not get that passage. Check the reference (English book names) and the internet connection, or paste the text.')}finally{b.disabled=false}});
 function addItem(type,songId){
   const Z=curSess();if(!Z){toast('Create a session first');return}
   if(type==='song'){const id=songId||st.song?.id;if(!id){toast('Open a song first');return}
@@ -1034,7 +1065,7 @@ function renderSess(lite){
   if(!lite){$('#sessSel').innerHTML=L.map(z=>`<option value="${esc(z.id)}">${esc(z.date||'')} · ${esc(z.name)}</option>`).join('')||'<option>No sessions</option>';if(Z)$('#sessSel').value=Z.id;
     $('#sessName').value=Z?.name||'';$('#sessDate').value=Z?.date||''}
   $('#set').innerHTML=Z?Z.items.map((it,i)=>{const S=it.type==='song'?songById(it.id):null;
-    return `<div class="item${i===st.itemIdx?' on':''}" data-i="${i}"><span class="ic">${IT[it.type].ic}</span><div class="nm"><b>${esc(itemLabel(it,true))}</b>${(it.type==='sharing'||it.type==='prayer')&&it.name?`<small>${esc(it.name)}</small>`:''}</div>${S?`<a class="sp" href="${esc(spotifyUrl(S))}" target="_blank" rel="noopener" title="Open in Spotify">♫</a>`:''}<button data-up="${i}" aria-label="Move up">↑</button><button data-dn="${i}" aria-label="Move down">↓</button><button data-rm="${i}" aria-label="Remove">✕</button></div>`}).join('')||'<div class="empty">Empty. Add items below.</div>':'';
+    return `<div class="item${i===st.itemIdx?' on':''}" data-i="${i}"><span class="ic">${IT[it.type].ic}</span><div class="nm"><b>${esc(itemLabel(it,true))}</b>${(it.type==='sharing'||it.type==='prayer'||it.type==='bible')&&it.name?`<small>${esc(it.name)}</small>`:''}</div>${S?`<a class="sp" href="${esc(spotifyUrl(S))}" target="_blank" rel="noopener" title="Open in Spotify">♫</a>`:''}<button data-up="${i}" aria-label="Move up">↑</button><button data-dn="${i}" aria-label="Move down">↓</button><button data-rm="${i}" aria-label="Remove">✕</button></div>`}).join('')||'<div class="empty">Empty. Add items below.</div>':'';
   const f=Z&&FS.sfiles[Z.id];$('#sessFile').textContent=FS.dir?(f?'Saved as sessions/'+f.name:'Saving to the sessions folder…'):'Saved in this browser.';
 }
 $('#set').addEventListener('click',e=>{if(e.target.closest('a'))return;const Z=curSess();if(!Z)return;const b=e.target.closest('button');const L=Z.items;
@@ -1078,17 +1109,22 @@ function sessToText(Z){const L=['Session: '+Z.name,'Date: '+Z.date,''];const two
     else if(it.type==='song'){const S=songById(it.id);L.push('Song: '+(S?fileBase(S):it.ref||''))}
     else if(it.type==='prayer')L.push('Prayer'+(it.title||it.name?': '+two(it.title,it.name):''));
     else if(it.type==='sharing')L.push('Sharing: '+two(it.title,it.name));
+    else if(it.type==='bible'){L.push('Bible: '+two(it.title,it.name));String(it.text||'').split('\n').map(x=>x.trim()).filter(Boolean).forEach(x=>L.push('> '+x))}
+    else if(it.type==='announce'){L.push('Announcements'+(it.title?': '+it.title:':'));it.requests.forEach(r=>L.push('- '+r))}
     else{L.push('Prayer Requests'+(it.title?': '+it.title:':'));it.requests.forEach(r=>L.push('- '+r))}});
   return L.join('\n')+'\n'}
 function textToSess(text,fname){
   const L=String(text).replace(/^﻿/,'').replace(/\r/g,'').split('\n');const Z={id:uid(),name:'',date:'',items:[]};let i=0;
   for(;i<L.length;i++){const t=L[i].trim();if(!t)continue;const m=t.match(/^(session|group|name|nama|kelompok|date|tanggal)\s*:\s*(.*)$/i);if(!m)break;if(/date|tanggal/i.test(m[1]))Z.date=m[2].trim();else Z.name=m[2].trim()}
   for(;i<L.length;i++){const t=L[i].trim();if(!t)continue;
-    if(/^[-•*]\s*/.test(t)){let last=Z.items[Z.items.length-1];if(!last||last.type!=='requests'){last=newItem('requests');Z.items.push(last)}last.requests.push(t.replace(/^[-•*]\s*/,''));continue}
-    const m=t.match(/^(welcome|selamat datang|song|lagu|prayer requests?|pokok doa|prayer|doa|sharing|kesaksian)\b\s*:?\s*(.*)$/i);if(!m)continue;
+    if(/^>\s?/.test(t)){const last=Z.items[Z.items.length-1];if(last&&last.type==='bible'){last.text=(last.text?last.text+'\n':'')+t.replace(/^>\s?/,'')}continue}
+    if(/^[-•*]\s*/.test(t)){let last=Z.items[Z.items.length-1];if(!last||(last.type!=='requests'&&last.type!=='announce')){last=newItem('requests');Z.items.push(last)}last.requests.push(t.replace(/^[-•*]\s*/,''));continue}
+    const m=t.match(/^(welcome|selamat datang|song|lagu|prayer requests?|pokok doa|prayer|doa|sharing|kesaksian|bible reading|bible|scripture|pembacaan alkitab|alkitab|firman|announcements?|pengumuman|warta)\b\s*:?\s*(.*)$/i);if(!m)continue;
     const k=m[1].toLowerCase(),rest=m[2].trim(),[a,b]=rest.split(/\s*\|\s*/);
     if(k==='song'||k==='lagu'){const S=resolveRef(rest);Z.items.push(newItem('song',{id:S?.id||null,ref:rest}))}
     else if(k==='welcome'||k==='selamat datang')Z.items.push(newItem('welcome',{title:k==='selamat datang'&&!rest?'Selamat Datang':(rest||'')}));
+    else if(/bible|scripture|alkitab|firman/.test(k))Z.items.push(newItem('bible',{title:a||'',name:b||''}));
+    else if(/announcement|pengumuman|warta/.test(k))Z.items.push(newItem('announce',{title:rest}));
     else if(/requests?|pokok/.test(k))Z.items.push(newItem('requests',{title:rest}));
     else if(k==='prayer'||k==='doa')Z.items.push(newItem('prayer',{title:a||'',name:b||''}));
     else Z.items.push(newItem('sharing',{title:a||'',name:b||''}))}

@@ -1,6 +1,6 @@
 # Worship Lyrics
 
-A single-page app for small-group worship at home: lyrics on the living-room TV, highlighted line by line, with worship sessions (Welcome, songs, Prayer, Sharing, Prayer Requests).
+A single-page app for small-group worship at home: lyrics on the living-room TV, highlighted line by line, with worship sessions (Welcome, songs, Prayer, Bible reading, Sharing, Announcements, Prayer Requests).
 
 **Open it:** https://asuwend1.github.io/worship-lyrics/ (Chrome or Edge recommended)
 
