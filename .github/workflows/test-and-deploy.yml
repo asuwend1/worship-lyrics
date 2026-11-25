@@ -1,0 +1,71 @@
+name: Test and deploy
+
+# Every push runs the browser tests. The site is only published when they pass.
+#   main    -> https://asuwend1.github.io/worship-lyrics/
+#   preview -> https://asuwend1.github.io/worship-lyrics/preview/  (try changes here first)
+
+on:
+  push:
+    branches: [main, preview]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Run browser tests
+        run: python tests/run_tests.py
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      - name: Check out preview (if it exists)
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: preview
+          path: preview
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp main/index.html _site/index.html
+          touch _site/.nojekyll
+          if [ -f preview/index.html ]; then
+            mkdir -p _site/preview
+            cp preview/index.html _site/preview/index.html
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -19,5 +19,13 @@ Nothing is stored in this repository. Songs and sessions are saved either in you
 3. Build a session in the sidebar, connect the laptop to the TV, and press **Open TV window** (or **F** for full screen).
 4. Press **?** in the app for all keyboard shortcuts.
 
+## Privacy
+This repository and the website contain only the app's code: no songs, names, prayer requests or sessions. Your data stays in your own folder (for example Google Drive, protected by its sharing settings) or in your browser.
+
 ## Development
-The whole app is `index.html`: plain HTML, CSS and JavaScript with no build step. To work on it, open the file in Chrome, or serve the folder with `python3 -m http.server`.
+The whole app is `index.html`: plain HTML, CSS and JavaScript with no build step.
+
+- **Tests:** `pip install playwright && python -m playwright install chromium`, then `python tests/run_tests.py`. The tests drive the app in a headless browser, using made-up data only.
+- **Publishing:** every push runs the tests on GitHub Actions, and the site is only published if they pass.
+  - `main` is published to https://asuwend1.github.io/worship-lyrics/
+  - `preview` is published to https://asuwend1.github.io/worship-lyrics/preview/ so a change can be tried before it goes to `main`. The preview shares browser storage with the main site, so try risky changes with a test songs folder.

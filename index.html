@@ -168,6 +168,10 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
 @keyframes slide{to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){.stage .bg,.stage .bg i{animation:none!important}.stage .sc-bokeh i{opacity:.3;top:50%}}
 .stage .kick{font-size:2.6cqw;margin:0 0 1.6cqh;opacity:.85;font-weight:600;letter-spacing:.03em}
+.stage .pace{position:absolute;left:0;right:0;bottom:0;height:.7cqh;background:rgba(255,255,255,.08);opacity:0;transition:opacity .4s}
+.stage .pace.on{opacity:1}
+.stage .pace i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffce54,#ffe9a8)}
+.stage .count{font-size:14cqw;font-weight:800;line-height:1;margin:2cqh 0 0;color:#ffce54;text-shadow:0 .4cqw 1.6cqw rgba(0,0,0,.6)}
 .stage .who{font-size:3.2cqw!important;margin-top:3cqh!important;opacity:.95!important;font-weight:600}
 .stage .slide h1{font-size:calc(6.4cqw * var(--fit,1))}
 .stage .req{list-style:none;padding:0;margin:3.5cqh auto 0;text-align:left;max-width:80cqw;font-size:calc(min(3.6cqw, 58cqh / (var(--n,4) * 1.55)) * var(--fit,1));line-height:1.3;text-shadow:0 .2cqw .8cqw rgba(0,0,0,.6)}
@@ -195,7 +199,7 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
 </head>
 <body>
 <header class="top">
-  <h1>Worship <span>Lyrics</span> <small style="font-size:12px;color:var(--mute);font-weight:400" title="App version">v1.9.0</small></h1>
+  <h1>Worship <span>Lyrics</span> <small style="font-size:12px;color:var(--mute);font-weight:400" title="App version">v2.0.0</small></h1>
   <button id="btnTV" title="Open a separate window to drag onto the TV">Open TV window</button>
   <button id="btnFS" title="Full screen on this screen (F)">Present here <kbd>F</kbd></button>
   <button id="btnHelp">Help <kbd>?</kbd></button>
@@ -209,12 +213,13 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
     </section>
     <section>
       <h2>Worship session <span style="font-weight:400">next item <kbd>N</kbd></span></h2>
-      <div class="row"><select id="sessSel" style="flex:1" aria-label="Choose session"></select><button id="sessNew">+ New</button></div>
+      <div class="row"><select id="sessSel" style="flex:1" aria-label="Choose session"></select><button id="sessNew" title="New session from your default order">+ New</button><button id="sessDup" title="Copy this session for next week">Duplicate</button></div>
       <div class="sessgrid"><input type="text" id="sessName" aria-label="Group name" placeholder="Home Family Caregroup"><input type="date" id="sessDate" aria-label="Date"></div>
       <div class="list" id="set"></div>
       <select id="sessAdd" style="margin-top:6px" aria-label="Add to session"><option value="">+ Add to session…</option><option value="song">Current song</option><option value="welcome">Welcome screen</option><option value="prayer">Prayer</option><option value="sharing">Sharing</option><option value="bible">Bible reading</option><option value="announce">Announcements</option><option value="requests">Prayer requests</option></select>
       <label style="display:flex;gap:8px;align-items:flex-start;color:var(--ink);margin:8px 0 0;font-size:13px"><input type="checkbox" id="hf" style="margin-top:3px"> Hands-free: start the audio when a song comes up, and move on to the next item when it ends</label>
-      <div class="row" style="margin-top:6px"><button id="sessPractice" title="Copy the song list with Spotify links">Copy practice list</button><button id="sessDel">Delete session</button></div>
+      <div class="row" style="margin-top:6px"><button id="sessShare" title="Copy the whole run-sheet for WhatsApp">Copy run-sheet</button><button id="sessPractice" title="Copy the song list with Spotify links">Copy practice list</button></div>
+      <div class="row" style="margin-top:6px"><button id="sessTpl" title="New sessions will start with this order">Save as default order</button><button id="sessDel">Delete session</button></div>
       <p class="hint" id="sessFile"></p>
     </section>
     <section>
@@ -355,7 +360,7 @@ Without labels, blank lines split the parts, and a part that comes back is treat
 </div>
 
 <div class="modal" id="help"><div class="card">
-  <div class="row" style="justify-content:space-between"><h2 style="font-size:18px;color:var(--ink);margin:0">How to use it <small style="font-weight:400;color:var(--mute)">· version 1.9.0</small></h2><button id="helpClose">Close <kbd>Esc</kbd></button></div>
+  <div class="row" style="justify-content:space-between"><h2 style="font-size:18px;color:var(--ink);margin:0">How to use it <small style="font-weight:400;color:var(--mute)">· version 2.0.0</small></h2><button id="helpClose">Close <kbd>Esc</kbd></button></div>
   <h3>1 · Add a song</h3>
   <ol><li><b>+ New song</b>, then paste the lyrics into the <b>Edit song</b> tab. Sections like Verse, Chorus, Bait and Reff are detected automatically.</li>
   <li>Check the <b>song order</b>. Genius usually lists the full order already; fix it if your group sings it differently.</li>
@@ -371,7 +376,7 @@ Without labels, blank lines split the parts, and a part that comes back is treat
   <p>Deleted songs and sessions go to a <code>_trash</code> subfolder, so nothing is lost by accident. The app picks up new and changed files whenever you switch back to its window. Without a folder, songs are saved in this browser only.</p>
   <h3>Worship sessions</h3>
   <p>A session is the run-sheet for one meeting: Welcome screen (group name and date), songs, Prayer, Bible reading (reference, optional passage text shown page by page), Sharing (title and name), Announcements and Prayer Requests. Click any item to show it, press <kbd>N</kbd> for the next item, or keep pressing <kbd>Space</kbd>: after the last line of a song it moves on to the next item. With a songs folder, each session is saved as a text file in a <code>sessions</code> subfolder, for example:</p>
-  <p><code>Session: Home Family Caregroup</code><br><code>Date: 2026-11-28</code><br><br><code>Welcome</code><br><code>Song: Give Thanks - Don Moen</code><br><code>Prayer: Opening prayer | Budi</code><br><code>Bible: Psalm 23:1-3 | WEB</code><br><code>&gt; 1 The LORD is my shepherd…</code><br><code>Sharing: God's faithfulness | Nadya</code><br><code>Announcements:</code><br><code>- Christmas service - Dec 24, 7 PM</code><br><code>Prayer Requests:</code><br><code>- Healing for ...</code></p>
+  <p><code>Session: Home Family Caregroup</code><br><code>Date: 2026-11-28</code><br><br><code>Welcome</code><br><code>Song: Give Thanks - Don Moen</code><br><code>Prayer: Opening prayer | Andy</code><br><code>Bible: Psalm 23:1-3 | WEB</code><br><code>&gt; 1 The LORD is my shepherd…</code><br><code>Sharing: God's faithfulness | Sarah</code><br><code>Announcements:</code><br><code>- Christmas service - Dec 24, 7 PM</code><br><code>Prayer Requests:</code><br><code>- Healing for ...</code></p>
   <h3>3 · During worship</h3>
   <ol><li>Connect the laptop to the TV. Then either click <b>Open TV window</b> and drag it onto the TV (double-click it for full screen), or mirror the screen and press <kbd>F</kbd>.</li>
   <li>Press <kbd>Enter</kbd> to start the music. Any key overrides: during a recording, <kbd>C</kbd> or <kbd>R</kbd> moves the music too, so you can sing the chorus one more time.</li>
@@ -657,7 +662,7 @@ function stageModel(){
   const view=st.ov||st.view;
   const badge=st.rec?'<div class="badge">● REC</div>':'';
   if(view==='blank'){m.html=badge;return m}
-  if(view==='title'||!S.sections.length){m.html=`<div class="ct"><div class="ttl"><h1>${esc(S.title)}</h1>${S.artist?`<p>${esc(S.artist)}</p>`:''}${!S.sections.length?'<p>(No lyrics yet: paste them in the Edit tab)</p>':''}</div></div>`+badge;return m}
+  if(view==='title'||!S.sections.length){m.html=`<div class="ct"><div class="ttl"><h1>${esc(S.title)}</h1>${S.artist?`<p>${esc(S.artist)}</p>`:''}${st.count?`<div class="count">${st.count}</div>`:''}${!S.sections.length?'<p>(No lyrics yet: paste them in the Edit tab)</p>':''}</div></div>`+badge;return m}
   const sec=S.sections[st.s];if(!sec){m.html=badge;return m}
   const len=sec.lines.length;const per=S.lines&&S.lines<99?S.lines:len;
   const pages=Math.ceil(len/per),size=Math.ceil(len/pages);const a=Math.floor(st.l/size)*size;const N=Math.min(size,len-a);
@@ -685,7 +690,7 @@ function nextBlockName(){
 function paint(root,m){
   if(!root)return;
   let bg=root.querySelector('.bg'),ct=root.querySelector('.layer');
-  if(!bg){root.innerHTML='<div class="bg"></div><div class="veil"></div><div class="layer"></div>';bg=root.querySelector('.bg');ct=root.querySelector('.layer')}
+  if(!bg){root.innerHTML='<div class="bg"></div><div class="veil"></div><div class="layer"></div><div class="pace"><i></i></div>';bg=root.querySelector('.bg');ct=root.querySelector('.layer')}
   root.className=m.cls||'stage';root.style.setProperty('--fs',m.fs);root.style.setProperty('--n',m.n||4);
   if(bg.dataset.k!==m.bgKey){bg.dataset.k=m.bgKey;bg.setAttribute('style',m.bgStyle);bg.className=m.bgCls||'bg';bg.innerHTML=m.bgInner||''}
   const key=m.html.replace(/ (cur|done)"/g,'"')+'|'+m.fs+'|'+root.clientWidth+'x'+root.clientHeight;
@@ -813,8 +818,9 @@ function recStop(){
 }
 
 /* ---------- tick ---------- */
+function setPace(f){[$('#preview'),tv&&!tv.closed?tv.document.getElementById('stage'):null].forEach(r=>{if(!r)return;const p=r.querySelector('.pace');if(!p)return;p.classList.toggle('on',f>=0&&st.ov!=='blank');p.firstChild.style.width=(Math.max(0,f)*100).toFixed(1)+'%'})}
 setInterval(()=>{
-  if(!st.song)return;
+  if(!st.song){setPace(-1);return}
   const k=mType();
   if(k==='clock'){const c=$('#clk');if(c)c.textContent=fmt(clock.t)}
   if(followActive()){
@@ -822,7 +828,11 @@ setInterval(()=>{
     let j=-1;for(let i=0;i<A.length;i++){if(A[i].t<=t)j=i;else break}
     if(st.hold){if(performance.now()<st.hold.until&&j<st.hold.j)j=st.hold.j;else st.hold=null}
     if(j!==st.tl){applyEntry(j);renderStage();hiCue()}
-  }
+    let cnt=0;if(j<0&&A.length&&mPlaying()){const left=A[0].t-t;if(left>0&&left<=3.2)cnt=Math.ceil(left)}
+    if(cnt!==(st.count||0)){st.count=cnt;renderStage()}
+    let frac=-1;const nx=A[j+1];if(nx&&mPlaying()){const st0=j>=0?A[j].t:Math.max(0,A[0].t-4);frac=Math.min(1,Math.max(0,(t-st0)/Math.max(.5,nx.t-st0)))}
+    setPace(frac)
+  }else{setPace(-1);if(st.count){st.count=0;renderStage()}}
   $('#time').textContent=k==='none'?'Live':fmt(mTime())+(mDur()?' / '+fmt(mDur()):'');
 },100);
 setInterval(()=>{updTransport();updUpNext()},1000);
@@ -988,10 +998,25 @@ const spotifyUrl=S=>S?.spotify||(/spotify\.com/.test(S?.media?.link||'')?S.media
 function updSpot(){const a=$('#spotLink');if(!st.song||st.slide){a.style.display='none';return}a.style.display='';a.href=spotifyUrl(st.song);a.textContent=st.song.spotify?'♫ Practice on Spotify ↗':'♫ Search on Spotify ↗'}
 const IT={bible:{n:'Bible reading',ic:'B',def:'Bible Reading'},announce:{n:'Announcements',ic:'A',def:'Announcements'},welcome:{n:'Welcome screen',ic:'W',def:'Welcome'},song:{n:'Song',ic:'♪'},prayer:{n:'Prayer',ic:'P',def:'Prayer'},sharing:{n:'Sharing',ic:'S',def:'Sharing'},requests:{n:'Prayer requests',ic:'R',def:'Prayer Requests'}};
 function newItem(type,extra){return Object.assign({type,id:null,ref:'',title:'',name:'',text:'',requests:[]},extra||{})}
-function templateSession(songIds){return{id:uid(),name:'Home Family Caregroup',date:todayISO(),items:[newItem('welcome'),...(songIds||[]).map(id=>newItem('song',{id})),newItem('prayer'),newItem('sharing'),newItem('requests')]}}
+function templateSession(songIds){
+  const T=Array.isArray(db.template)&&db.template.length?db.template:null;let items;
+  if(T){items=T.map(t=>newItem(t.type,{title:t.title||''}));const ids=(songIds||[]).slice();items.forEach(it=>{if(it.type==='song'&&ids.length)it.id=ids.shift()});
+    if(ids.length){let at=-1;items.forEach((x,i)=>{if(x.type==='song')at=i});items.splice(at+1,0,...ids.map(id=>newItem('song',{id})))}}
+  else items=[newItem('welcome'),...(songIds||[]).map(id=>newItem('song',{id})),newItem('prayer'),newItem('sharing'),newItem('requests')];
+  return{id:uid(),name:db.lastGroup||'Home Family Caregroup',date:todayISO(),items}}
+function saveTemplate(){const Z=curSess();if(!Z||!Z.items.length){toast('This session is empty');return}
+  const keepTitle={welcome:1,prayer:1,requests:1,announce:1};
+  db.template=Z.items.map(it=>({type:it.type,title:keepTitle[it.type]?(it.title||''):''}));save();
+  toast(`Saved: new sessions will start with these ${db.template.length} items (song slots stay empty to fill each week)`)}
+const addDays=(iso,n)=>{const d=new Date((iso||todayISO())+'T12:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function duplicateSession(){const Z=curSess();if(!Z)return;const N=JSON.parse(JSON.stringify(Z));N.id=uid();
+  let d=addDays(Z.date,7);while(d<todayISO())d=addDays(d,7);N.date=d;
+  N.items.forEach(it=>{if(it.type==='sharing'){it.title='';it.name=''}if(it.type==='prayer')it.name='';if(it.type==='requests')it.requests=[];if(it.type==='bible'){it.title='';it.text=''}if(it.type==='announce')it.requests=[]});
+  db.sessions.push(N);db.curSess=N.id;st.itemIdx=-1;save();renderSess();
+  toast(`Copied to ${fmtDate(N.date)}. Songs kept; sharing, Bible reading, announcements and prayer requests cleared.`)}
 const sortedSessions=()=>db.sessions.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||a.name.localeCompare(b.name));
 function curSess(){return db.sessions.find(z=>z.id===db.curSess)||sortedSessions()[0]||null}
-function itemLabel(it,short){if(it.type==='song'){const S=songById(it.id);return S?S.title:'Missing song: '+(it.ref||'?')}
+function itemLabel(it,short){if(it.type==='song'){const S=songById(it.id);return S?S.title:(it.ref?'Missing song: '+it.ref:'Choose a song (+ Add in the library)')}
   if(it.type==='welcome')return 'Welcome'+(it.title&&it.title!=='Welcome'?': '+it.title:'');
   if(it.type==='prayer')return (it.title||'Prayer')+(!short&&it.name?' · '+it.name:'');
   if(it.type==='sharing')return 'Sharing: '+(it.title||'(add a title)')+(!short&&it.name?' · '+it.name:'');
@@ -1039,10 +1064,10 @@ function passagePages(text){
   const pages=[];let cur=[],len=0;const MAX=300;
   units.forEach(u=>{if(cur.length&&len+u.length>MAX){pages.push(cur);cur=[];len=0}cur.push(u);len+=u.length+1});if(cur.length)pages.push(cur);return pages}
 function hasNextItem(){const Z=curSess();return!!Z&&st.itemIdx>=0&&st.itemIdx<Z.items.length-1}
-function stepItem(d){const Z=curSess();if(!Z||!Z.items.length)return;let i=st.itemIdx<0?(d>0?0:Z.items.length-1):st.itemIdx+d;if(i<0||i>=Z.items.length){toast(i<0?'This is the first item':'End of the session');return}goItem(i,d<0)}
+function stepItem(d){const Z=curSess();if(!Z||!Z.items.length)return;let i=st.itemIdx<0?(d>0?0:Z.items.length-1):st.itemIdx+d;while(i>=0&&i<Z.items.length&&Z.items[i].type==='song'&&!Z.items[i].id)i+=d>0?1:-1;if(i<0||i>=Z.items.length){toast(i<0?'This is the first item':'End of the session');return}goItem(i,d<0)}
 async function goItem(i,fromEnd){
   const Z=curSess();const it=Z?.items[i];if(!it)return;st.itemIdx=i;
-  if(it.type==='song'){if(songById(it.id)){await loadSong(it.id,true)}else{toast('Song not found: '+(it.ref||''))}renderSess();return}
+  if(it.type==='song'){if(songById(it.id)){await loadSong(it.id,true)}else{toast(it.ref?'Song not found: '+it.ref:'Empty song slot: open a song in the library and click + Add')}renderSess();return}
   if(st.rec)st.rec=false;pause();st.slidePage=fromEnd&&it.type==='bible'?Math.max(0,passagePages(it.text).length-1):0;st.slide=it;st.song=null;st.ov=null;st.bg=resolveBg(null);
   $('#live').classList.add('slide-mode');if(!$('#edit').hidden)showTab('live');
   $('#songName').textContent=IT[it.type].n;updSpot();buildCue();renderLib();renderStage();
@@ -1082,6 +1107,7 @@ $('#cue').addEventListener('click',async e=>{if(e.target.id==='sfPasteBG'&&st.sl
 function addItem(type,songId){
   const Z=curSess();if(!Z){toast('Create a session first');return}
   if(type==='song'){const id=songId||st.song?.id;if(!id){toast('Open a song first');return}
+    const slot=Z.items.findIndex(x=>x.type==='song'&&!x.id&&!x.ref);if(slot>=0){Z.items[slot].id=id;if(st.song?.id===id&&!st.slide)st.itemIdx=slot;save();renderSess();toast('Added “'+(songById(id)?.title||'')+'” to the session');return}
     let at=-1;Z.items.forEach((x,i)=>{if(x.type==='song')at=i});if(at<0)at=Z.items.findIndex(x=>x.type==='welcome');
     Z.items.splice(at+1,0,newItem('song',{id}));if(st.itemIdx>at)st.itemIdx++;if(st.song?.id===id&&!st.slide)st.itemIdx=at+1;toast('Added “'+(songById(id)?.title||'')+'” to the session')}
   else{if(type==='bible'){}let at=st.itemIdx>=0?st.itemIdx+1:Z.items.findIndex(x=>x.type==='requests');if(at<0)at=Z.items.length;Z.items.splice(at,0,newItem(type));if(st.itemIdx>=at)st.itemIdx++}
@@ -1103,13 +1129,24 @@ $('#set').addEventListener('click',e=>{if(e.target.closest('a'))return;const Z=c
     save();renderSess();return}
   const it=e.target.closest('.item');if(it){showTab('live');goItem(+it.dataset.i)}});
 $('#sessSel').addEventListener('change',e=>{e.target.blur();db.curSess=e.target.value;st.itemIdx=-1;save();renderSess()});
-$('#sessName').addEventListener('input',e=>{const Z=curSess();if(!Z)return;Z.name=e.target.value;save();renderSess(true);if(st.slide)renderStage()});
+$('#sessName').addEventListener('input',e=>{const Z=curSess();if(!Z)return;Z.name=e.target.value;db.lastGroup=e.target.value;save();renderSess(true);if(st.slide)renderStage()});
 $('#sessName').addEventListener('change',()=>renderSess());
 $('#sessDate').addEventListener('change',e=>{const Z=curSess();if(!Z)return;Z.date=e.target.value;save();renderSess();if(st.slide)renderStage()});
+$('#sessDup').onclick=duplicateSession;$('#sessTpl').onclick=saveTemplate;
 $('#sessNew').onclick=()=>{const prev=curSess();const Z=templateSession([]);if(prev)Z.name=prev.name;db.sessions.push(Z);db.curSess=Z.id;st.itemIdx=-1;save();renderSess();toast('New session created. Add songs with “+ Add” in the library.')};
 $('#sessDel').onclick=()=>{const Z=curSess();if(!Z)return;if(!confirm(`Delete the session “${Z.date} · ${Z.name}”?${FS.dir?' Its file will be moved to the _trash folder.':''} Songs are not deleted.`))return;db.sessions=db.sessions.filter(z=>z!==Z);if(!db.sessions.length)db.sessions.push(templateSession([]));db.curSess=sortedSessions()[0].id;st.itemIdx=-1;save();renderSess()};
 $('#hf').addEventListener('change',e=>{try{localStorage.setItem(LS+'.hf',e.target.checked?'1':'0')}catch(err){}toast(e.target.checked?'Hands-free on (works with audio-file songs)':'Hands-free off')});
 $('#sessAdd').addEventListener('change',e=>{const v=e.target.value;e.target.value='';e.target.blur();if(v)addItem(v)});
+$('#sessShare').onclick=()=>{const Z=curSess();if(!Z)return;const L=[`*${Z.name}*`,fmtDate(Z.date),''];let n=0;
+  Z.items.forEach(it=>{const S=it.type==='song'?songById(it.id):null;
+    if(it.type==='welcome')L.push('• '+(it.title||'Welcome'));
+    else if(it.type==='song'){if(S)L.push(`• 🎵 ${S.title}${S.artist?' – '+S.artist:''}\n   ${spotifyUrl(S)}`)}
+    else if(it.type==='prayer')L.push('• 🙏 '+(it.title||'Prayer')+(it.name?' – '+it.name:''));
+    else if(it.type==='bible')L.push('• 📖 '+(it.title||'Bible reading')+(it.name?' ('+it.name+')':''));
+    else if(it.type==='sharing')L.push('• 💬 Sharing'+(it.title?': '+it.title:'')+(it.name?' – '+it.name:''));
+    else if(it.type==='announce'){L.push('• 📣 '+(it.title||'Announcements'));it.requests.forEach(r=>L.push('   – '+r))}
+    else if(it.type==='requests')L.push('• 🙏 '+(it.title||'Prayer Requests'))});
+  navigator.clipboard.writeText(L.join('\n')).then(()=>toast('Run-sheet copied (prayer requests themselves are left out for privacy)'),()=>toast('Could not copy to the clipboard'))};
 $('#sessPractice').onclick=()=>{const Z=curSess();if(!Z)return;const songs=Z.items.filter(it=>it.type==='song').map(it=>songById(it.id)).filter(Boolean);
   if(!songs.length){toast('No songs in this session yet');return}
   const txt=`${Z.name} · ${fmtDate(Z.date)}\nSongs to practice:\n\n`+songs.map((S,i)=>`${i+1}. ${S.title}${S.artist?' – '+S.artist:''}\n   ${spotifyUrl(S)}`).join('\n');
@@ -1211,7 +1248,7 @@ function textToSong(text,fname){
   return{title,artist,lang,src:h.source||h.sumber||'',spotify:h.spotify||'',lyrics};
 }
 function metaSig(S){const m=songMeta(S);delete m.mUpdated;return JSON.stringify(m)}
-const defSig=()=>JSON.stringify({defScene:db.defScene,defPal:db.defPal,anim:db.anim!==false});
+const defSig=()=>JSON.stringify({defScene:db.defScene,defPal:db.defPal,anim:db.anim!==false,template:db.template||null});
 function songMeta(S){return{mUpdated:S.mUpdated||0,id:S.id,title:S.title,order:S.orderText,types:S.sections.map(x=>x.type),timeline:S.timeline,tlSig:S.tlSig,offset:S.offset,fs:S.fs,lines:S.lines,bgScene:S.bgScene,bgPal:S.bgPal,media:{type:S.media.type,link:S.media.link||'',audioFile:S.media.audioFile||'',audioName:S.media.audioName||''}}}
 function applyMeta(S,m,keepId){
   if(!m)return;if(!keepId&&m.id)S.id=m.id;
@@ -1224,7 +1261,7 @@ function applyMeta(S,m,keepId){
 async function readMeta(){try{const t=await (await (await FS.dir.getFileHandle(META)).getFile()).text();return{text:t,json:JSON.parse(t)}}catch(e){return null}}
 async function scanTxt(){const out=[];for await(const [name,h] of FS.dir.entries())if(h.kind==='file'&&/\.txt$/i.test(name)&&!/^[._~]/.test(name))out.push(h);return out}
 function buildMeta(){const songs={};db.songs.forEach(S=>{const f=FS.files[S.id];if(f)songs[f.name]=songMeta(S)});
-  return{app:'worship-lyrics',v:1,note:'Settings for the Worship Lyrics app (timing, order, backgrounds). Lyrics are in the .txt files; sessions are in the sessions folder.',defaults:{defScene:db.defScene,defPal:db.defPal,anim:db.anim!==false,updated:db.defUpdated||0},songs}}
+  return{app:'worship-lyrics',v:1,note:'Settings for the Worship Lyrics app (timing, order, backgrounds). Lyrics are in the .txt files; sessions are in the sessions folder.',defaults:{defScene:db.defScene,defPal:db.defPal,anim:db.anim!==false,template:db.template||null,updated:db.defUpdated||0},songs}}
 async function songFromHandle(h,meta,used,names){
   const f=await h.getFile();const d=textToSong(await f.text(),h.name);const S=newSong(d);reparse(S);
   let mk=meta.songs&&meta.songs[h.name]?h.name:null;
@@ -1244,7 +1281,7 @@ async function loadFromFolder(){
   if(!db.sessions.length&&songs.length){const ids=(meta.setlist||[]).map(n=>byName[n]).filter(Boolean);db.sessions=[templateSession(ids)]}
   let sn='';try{sn=localStorage.getItem(LS+'.sess')||''}catch(e){}
   db.curSess=(Object.entries(FS.sfiles).find(([id,f])=>f.name===sn)||[])[0]||sortedSessions()[0]?.id||null;
-  const D=meta.defaults||{};if(D.defScene)db.defScene=D.defScene;if(D.defPal)db.defPal=D.defPal;if(D.anim!=null)db.anim=D.anim;db.defUpdated=D.updated||0;FS.dwritten=defSig();
+  const D=meta.defaults||{};if(Array.isArray(D.template))db.template=D.template;if(D.defScene)db.defScene=D.defScene;if(D.defPal)db.defPal=D.defPal;if(D.anim!=null)db.anim=D.anim;db.defUpdated=D.updated||0;FS.dwritten=defSig();
   try{const bf=await (await FS.dir.getFileHandle('_background.jpg')).getFile();customBg=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=()=>r(customBg);fr.readAsDataURL(bf)})}catch(e){}
   FS.metaText=m?m.text:'';
   try{db.last=localStorage.getItem(LS+'.last')||db.last}catch(e){}
@@ -1272,7 +1309,7 @@ async function flushFolder(){
       FS.mwritten[S.id]=metaSig(S)}
     const dd=dj.defaults||{};
     if(defSig()!==FS.dwritten)db.defUpdated=Date.now();
-    else if((dd.updated||0)>(db.defUpdated||0)){if(dd.defScene)db.defScene=dd.defScene;if(dd.defPal)db.defPal=dd.defPal;if(dd.anim!=null)db.anim=dd.anim;db.defUpdated=dd.updated;fillDefaults()}
+    else if((dd.updated||0)>(db.defUpdated||0)){if(Array.isArray(dd.template))db.template=dd.template;if(dd.defScene)db.defScene=dd.defScene;if(dd.defPal)db.defPal=dd.defPal;if(dd.anim!=null)db.anim=dd.anim;db.defUpdated=dd.updated;fillDefaults()}
     FS.dwritten=defSig();
     const onDisk=new Set((await scanTxt()).map(h=>h.name));const out=buildMeta();
     Object.entries(dj.songs||{}).forEach(([n,m])=>{if(!out.songs[n]&&onDisk.has(n)&&!Object.values(FS.files).some(f=>f.name===n))out.songs[n]=m});
