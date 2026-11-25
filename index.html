@@ -190,6 +190,10 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
 .stage .pace.on{opacity:1}
 .stage .pace i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffce54,#ffe9a8)}
 .stage .count{font-size:14cqw;font-weight:800;line-height:1;margin:2cqh 0 0;color:#ffce54;text-shadow:0 .4cqw 1.6cqw rgba(0,0,0,.6)}
+.stage .prog{position:absolute;left:50%;bottom:2.4cqh;transform:translateX(-50%);display:flex;gap:.7cqw;align-items:center}
+.stage .prog i{display:block;width:1cqw;height:1cqw;border-radius:1cqw;background:rgba(255,255,255,.22);transition:all .3s}
+.stage .prog i.d{background:rgba(255,255,255,.6)}
+.stage .prog i.c{background:#ffce54;width:2.6cqw}
 .stage .who{font-size:3.2cqw!important;margin-top:3cqh!important;opacity:.95!important;font-weight:600}
 .stage .slide h1{font-size:calc(6.4cqw * var(--fit,1))}
 .stage .req{list-style:none;padding:0;margin:3.5cqh auto 0;text-align:left;max-width:80cqw;font-size:calc(min(3.6cqw, 58cqh / (var(--n,4) * 1.55)) * var(--fit,1));line-height:1.3;text-shadow:0 .2cqw .8cqw rgba(0,0,0,.6)}
@@ -237,10 +241,10 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
     </section>
     <section>
       <h2>Worship session <span style="font-weight:400">next item <kbd>N</kbd></span></h2>
-      <div class="row"><select id="sessSel" style="flex:1" aria-label="Choose session"></select><button id="sessNew" title="New session from your default order">+ New</button><button id="sessDup" title="Copy this session for next week">Duplicate</button></div>
+      <div class="row"><select id="sessSel" style="flex:1" aria-label="Choose session"></select><button id="sessNew" title="Start a separate new session (your current one stays in the dropdown)">New session</button><button id="sessDup" title="Copy this session for next week">Duplicate</button></div>
       <div class="sessgrid"><input type="text" id="sessName" aria-label="Group name" placeholder="Home Family Caregroup"><input type="date" id="sessDate" aria-label="Date"></div>
       <div class="list" id="set"></div>
-      <select id="sessAdd" style="margin-top:6px" aria-label="Add to session"><option value="">+ Add to session…</option><option value="song">Current song</option><option value="welcome">Welcome screen</option><option value="prayer">Prayer</option><option value="sharing">Sharing</option><option value="bible">Bible reading</option><option value="announce">Announcements</option><option value="requests">Prayer requests</option></select>
+      <select id="sessAdd" style="margin-top:6px" aria-label="Add to session"><option value="">+ Add a slide or song to this session…</option><option value="song">Current song</option><option value="welcome">Welcome screen</option><option value="prayer">Prayer</option><option value="sharing">Sharing</option><option value="bible">Bible reading</option><option value="announce">Announcements</option><option value="requests">Prayer requests</option></select>
       <label style="display:flex;gap:8px;align-items:flex-start;color:var(--ink);margin:8px 0 0;font-size:13px"><input type="checkbox" id="hf" style="margin-top:3px"> Hands-free: start the audio when a song comes up, and move on to the next item when it ends</label>
       <div class="row" style="margin-top:6px"><button id="sessShare" title="Copy the whole run-sheet for WhatsApp">Copy run-sheet</button><button id="sessPractice" title="Copy the song list with Spotify links">Copy practice list</button></div>
       <div class="row" style="margin-top:6px"><button id="sessTpl" title="New sessions will start with this order">Save as default order</button><button id="sessDel">Delete session</button></div>
@@ -252,6 +256,7 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
       <div class="stage bgprev" id="dBgPrev"></div>
       <div class="row" style="margin-top:8px">
         <label style="margin:0;display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="dAnim"> Animate backgrounds</label>
+        <label style="margin:0;display:flex;gap:6px;align-items:center;color:var(--ink)"><input type="checkbox" id="dProg"> Song progress dots</label>
         <button id="dImg">Upload image…</button><input type="file" id="fBg" accept="image/*" hidden>
       </div>
       <p class="hint">Used by every song set to “Default”. With Random, each song opens with a different scene and colors.</p>
@@ -277,7 +282,7 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
     </div>
 
     <section id="live">
-      <div id="bnRec" class="banner rec">Recording timing: press <kbd>Space</kbd> as each line <b>starts</b>. Jump keys (<kbd>C</kbd> <kbd>1</kbd>–<kbd>9</kbd> <kbd>B</kbd> <kbd>R</kbd> <kbd>E</kbd>) follow the recording's own repeats. <kbd>K</kbd> marks an instrumental break, <kbd>←</kbd> undoes. Press <kbd>S</kbd> to finish.</div>
+      <div id="bnRec" class="banner rec">Recording timing: press <kbd>Space</kbd> as each line <b>starts</b>. Jump keys (<kbd>C</kbd> <kbd>1</kbd>–<kbd>9</kbd> <kbd>B</kbd> <kbd>R</kbd> <kbd>E</kbd>) follow the recording's own repeats. <kbd>K</kbd> marks an instrumental break, <kbd>↑</kbd> undoes. Press <kbd>S</kbd> to finish.</div>
       <div class="stagewrap" id="stagewrap">
         <div class="stage" id="preview"></div>
       </div>
@@ -296,9 +301,9 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
         <div class="cue" id="cue"></div>
         <div class="keys">
           <table>
-            <tr><td><kbd>Space</kbd> <kbd>→</kbd> <kbd>PgDn</kbd></td><td>Next line</td></tr>
-            <tr><td><kbd>←</kbd> <kbd>PgUp</kbd></td><td>Previous line</td></tr>
-            <tr><td><kbd>↓</kbd> · <kbd>↑</kbd></td><td>Next · previous section</td></tr>
+            <tr><td><kbd>Space</kbd> <kbd>↓</kbd> <kbd>PgDn</kbd></td><td>Next line</td></tr>
+            <tr><td><kbd>↑</kbd> <kbd>PgUp</kbd></td><td>Previous line</td></tr>
+            <tr><td><kbd>→</kbd> · <kbd>←</kbd></td><td>Next · previous section</td></tr>
             <tr><td><kbd>C</kbd></td><td>Chorus / Reff</td></tr>
             <tr><td><kbd>1</kbd>–<kbd>9</kbd></td><td>Verse / Bait 1–9</td></tr>
             <tr><td><kbd>Shift</kbd>+<kbd>C</kbd></td><td>Pre-chorus</td></tr>
@@ -392,7 +397,7 @@ Without labels, blank lines split the parts, and a part that comes back is treat
   <li>Choose the music: an audio file (best: an instrumental or minus-one track), Spotify (uses a clock) or live musicians.</li></ol>
   <h3>2 · Teach it the timing once (for recorded music)</h3>
   <ol><li>On the <b>Live</b> tab press <b>Record timing</b> (<kbd>S</kbd>). The music starts from the beginning.</li>
-  <li>Tap <kbd>Space</kbd> at the start of every line. If the recording repeats a chorus, press <kbd>C</kbd>; for a section again, <kbd>R</kbd>; for an instrumental break, <kbd>K</kbd>. Made a mistake? <kbd>←</kbd> undoes the last tap.</li>
+  <li>Tap <kbd>Space</kbd> at the start of every line. If the recording repeats a chorus, press <kbd>C</kbd>; for a section again, <kbd>R</kbd>; for an instrumental break, <kbd>K</kbd>. Made a mistake? <kbd>↑</kbd> undoes the last tap.</li>
   <li>Press <kbd>S</kbd> at the end. From now on the lyrics move by themselves whenever that track plays. If they feel early or late, nudge with <kbd>[</kbd> <kbd>]</kbd>.</li></ol>
   <h3>Install and offline use</h3>
   <p>Click <b>Install app</b> (top right) or the install icon in Chrome's address bar. The app then opens in its own window from your Dock or Start menu, and it keeps working without Wi-Fi once it has been opened online. Leaders new to the app: see the <a href="https://github.com/asuwend1/worship-lyrics/blob/main/GUIDE.md" target="_blank" rel="noopener">Leader guide</a>.</p>
@@ -695,7 +700,7 @@ function stageModel(){
   const pages=Math.ceil(len/per),size=Math.ceil(len/pages);const a=Math.floor(st.l/size)*size;const N=Math.min(size,len-a);
   let lines='';for(let i=a;i<a+N;i++)lines+=`<div class="ln${i===st.l?' cur':i<st.l?' done':''}"><span>${esc(sec.lines[i])}</span></div>`;
   let nxt='';if(st.l===len-1){const n=nextBlockName();if(n)nxt=`<div class="nxt">${S.lang==='id'?'Berikutnya':'Next'}: ${esc(n)}</div>`}
-  m.n=N;m.html=`<div class="sec">${esc(sec.name)}${pages>1?` <span style="opacity:.6">${Math.floor(st.l/size)+1}/${pages}</span>`:''}</div><div class="ct">${lines}</div>${nxt}${badge}`;
+  m.n=N;m.html=progHTML()+`<div class="sec">${esc(sec.name)}${pages>1?` <span style="opacity:.6">${Math.floor(st.l/size)+1}/${pages}</span>`:''}</div><div class="ct">${lines}</div>${nxt}${badge}`;
   return m;
 }
 function nextSectionName(){const S=st.song;if(!S)return'';
@@ -709,6 +714,11 @@ function updUpNext(){const el=$('#upnext');if(!el)return;const Z=curSess();const
     const ns=v==='title'&&!followActive()?(st.seq[0]?S.sections[st.seq[0].s]?.name:''):nextSectionName();next=ns||'End of song';then=niTxt}
   const d=new Date();const clk=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
   el.innerHTML=`<span>Now: <b>${esc(now||'—')}</b></span><span>Next: <b>${esc(next||'—')}</b></span>${then?`<span>Next item: <b>${esc(then)}</b></span>`:''}<span class="clk">${esc(clk)}</span>`}
+const progOn=()=>{try{return localStorage.getItem(LS+'.prog')!=='0'}catch(e){return true}};
+function progHTML(){const S=st.song;if(!S||!progOn())return'';let n=0,cur=-1;
+  if(followActive()){const A=T();const starts=[];A.forEach((e,j)=>{if(!e.v&&e.l===0)starts.push(j)});n=starts.length;starts.forEach((j,i)=>{if(j<=st.tl)cur=i})}
+  else{const bs=[...new Set(st.seq.map(e=>e.b))];n=bs.length;if(st.detour){const r=st.seq[st.detour.ret-1];cur=r?bs.indexOf(r.b):-1}else if(st.pos>=st.seq.length)cur=n;else if(st.pos>=0)cur=bs.indexOf(st.seq[st.pos].b)}
+  if(n<2)return'';let h='';for(let i=0;i<n;i++)h+=`<i class="${i<cur?'d':i===cur?'c':''}"></i>`;return `<div class="prog" title="Song progress">${h}</div>`}
 function nextBlockName(){
   const S=st.song;
   if(followActive()){const e=T()[st.tl+1];if(e&&!e.v&&e.l===0)return S.sections[e.s]?.name;return''}
@@ -832,7 +842,7 @@ function recStart(){
 function recPush(){st.recBuf.push({t:mTime(),s:st.s,l:st.l,v:st.view==='line'?null:st.view,snap:{pos:st.pos,detour:st.detour?{...st.detour}:null,view:st.view}})}
 function recAct(name,arg){
   if(name==='prev'){const last=st.recBuf.pop();if(last){st.pos=last.snap.pos;st.detour=last.snap.detour;showPos();const prev=st.recBuf[st.recBuf.length-1];if(prev&&prev.v)st.view=prev.v;if(!prev){st.pos=-1;st.detour=null;showPos()}else{st.pos=prev.snap.pos;st.detour=prev.snap.detour?{...prev.snap.detour}:null;showPos();if(prev.v)st.view=prev.v}}render();return}
-  if(name==='prevSec'){toast('While recording, use ← to undo instead');return}
+  if(name==='prevSec'){toast('While recording, use ↑ to undo instead');return}
   if(name==='next')mNext();else if(name==='nextSec')mNextSec();else if(name==='jump'){if(!mJump(arg)){toast('No such section');return}}
   else if(name==='repeat')mRepeat();else if(name==='end')mEnd();
   recPush();render();
@@ -874,9 +884,9 @@ function onKey(e){
   const k=e.key;let done=true;
   if(st.slide&&!/^(?: |ArrowRight|ArrowDown|PageDown|ArrowLeft|ArrowUp|PageUp|Backspace|n|N|f|F|\?|k|K|\.|-|=|\+)$/.test(k))return;
   if(st.slide&&/^[-=+]$/.test(k))return;
-  if(k===' '||k==='ArrowRight'||k==='PageDown')act('next');
-  else if(k==='ArrowLeft'||k==='PageUp'||k==='Backspace')act('prev');
-  else if(k==='ArrowDown')act('nextSec');else if(k==='ArrowUp')act('prevSec');
+  if(k===' '||k==='ArrowDown'||k==='PageDown')act('next');
+  else if(k==='ArrowUp'||k==='PageUp'||k==='Backspace')act('prev');
+  else if(k==='ArrowRight')act('nextSec');else if(k==='ArrowLeft')act('prevSec');
   else if(k==='C')act('jump',isType('pre'));
   else if(k==='c')act('jump',isType('chorus'));
   else if(/^[1-9]$/.test(k))act('jump',isType('verse',+k));
@@ -1030,14 +1040,15 @@ $('#eShuffle').onclick=()=>{bgChanged()};
 $('#dScene').addEventListener('change',e=>{if(e.target.value==='image'&&!customBg){$('#fBg').click();e.target.value=db.defScene||'random';return}db.defScene=e.target.value;save();fillDefaults();if((st.song?.bgScene||'default')==='default')bgChanged()});
 $('#dPal').addEventListener('change',e=>{db.defPal=e.target.value;save();fillDefaults();if((st.song?.bgScene||'default')==='default')bgChanged()});
 $('#dAnim').addEventListener('change',e=>{db.anim=e.target.checked;save();fillDefaults();if(!$('#edit').hidden)fillBgEdit();renderStage()});
+$('#dProg').addEventListener('change',e=>{try{localStorage.setItem(LS+'.prog',e.target.checked?'1':'0')}catch(err){}renderStage()});
 $('#dImg').onclick=()=>$('#fBg').click();
 
 /* ---------- import / export ---------- */
 $('#btnExport').onclick=()=>{const data=JSON.stringify({app:'worship-lyrics',v:1,exported:new Date().toISOString(),songs:db.songs,sessions:db.sessions},null,1);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='worship-songs-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
 $('#btnImport').onclick=()=>$('#fImport').click();
 $('#fImport').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{const j=JSON.parse(t);if(!j||!Array.isArray(j.songs))throw 0;let n=0;
-  j.songs.forEach(s=>{if(!s||!s.id||typeof s.title!=='string')return;const S=newSong(s);S.media=Object.assign({type:'none',yt:'',link:'',audioName:''},s.media||{});if(S.media.type==='audio'||S.media.type==='youtube')S.media.type='none';S.media.yt='';if(!Array.isArray(S.sections)||!S.sections.length)reparse(S);const i=db.songs.findIndex(x=>x.id===S.id);if(i>=0)db.songs[i]=S;else db.songs.push(S);n++});
-  if(Array.isArray(j.sessions))j.sessions.forEach(Z=>{if(!Z||!Array.isArray(Z.items))return;const i=db.sessions.findIndex(x=>x.id===Z.id);if(i>=0)db.sessions[i]=Z;else db.sessions.push(Z)});
+  const remap={};j.songs.forEach(s=>{if(!s||!s.id||typeof s.title!=='string')return;const S=newSong(s);S.media=Object.assign({type:'none',yt:'',link:'',audioName:''},s.media||{});if(S.media.type==='audio'||S.media.type==='youtube')S.media.type='none';S.media.yt='';if(!Array.isArray(S.sections)||!S.sections.length)reparse(S);let i=db.songs.findIndex(x=>x.id===S.id);if(i<0){i=db.songs.findIndex(x=>x.title.trim().toLowerCase()===S.title.trim().toLowerCase()&&(x.artist||'').trim().toLowerCase()===(S.artist||'').trim().toLowerCase());if(i>=0){const old=db.songs[i].id;remap[S.id]=old;S.id=old}}if(i>=0)db.songs[i]=S;else db.songs.push(S);n++});
+  if(Array.isArray(j.sessions))j.sessions.forEach(Z=>{if(!Z||!Array.isArray(Z.items))return;Z.items.forEach(it=>{if(it.type==='song'&&remap[it.id])it.id=remap[it.id]});if(db.sessions.some(x=>x.id!==Z.id&&x.date===Z.date&&x.name===Z.name&&JSON.stringify(x.items.map(t=>t.type))===JSON.stringify(Z.items.map(t=>t.type))&&x.items.filter(t=>t.type==='song').map(t=>t.id).join()===Z.items.filter(t=>t.type==='song').map(t=>t.id).join()))return;const i=db.sessions.findIndex(x=>x.id===Z.id);if(i>=0)db.sessions[i]=Z;else db.sessions.push(Z)});
   save();renderLib();toast(`Imported ${n} song${n===1?'':'s'}`);if(st.song)loadSong(st.song.id)}).catch(()=>toast('That file is not a song library export'));e.target.value=''});
 
 /* ---------- top buttons ---------- */
@@ -1172,9 +1183,10 @@ function addItem(type,songId){
   else{if(type==='bible'){}let at=st.itemIdx>=0?st.itemIdx+1:Z.items.findIndex(x=>x.type==='requests');if(at<0)at=Z.items.length;Z.items.splice(at,0,newItem(type));if(st.itemIdx>=at)st.itemIdx++}
   save();renderSess();
 }
+function leaveSlide(){if(!st.slide)return;st.slide=null;st.song=null;$('#live').classList.remove('slide-mode');$('#songName').textContent='Click an item in the session to show it';updSpot();$('#cue').innerHTML='<div class="empty">Click an item in the worship session (left) to show it on the screen.</div>';$('#chips').innerHTML='';renderStage()}
 function renderSess(lite){
   const Z=curSess();const L=sortedSessions();
-  if(!lite){$('#sessSel').innerHTML=L.map(z=>`<option value="${esc(z.id)}">${esc(z.date||'')} · ${esc(z.name)}</option>`).join('')||'<option>No sessions</option>';if(Z)$('#sessSel').value=Z.id;
+  if(!lite){const seen={};$('#sessSel').innerHTML=L.map(z=>{const k=z.date+'|'+z.name;seen[k]=(seen[k]||0)+1;const n=z.items.filter(it=>it.type==='song'&&it.id).length;return `<option value="${esc(z.id)}">${esc(z.date||'')} · ${esc(z.name)}${seen[k]>1?' ('+seen[k]+')':''} · ${n} song${n===1?'':'s'}</option>`}).join('')||'<option>No sessions</option>';if(Z)$('#sessSel').value=Z.id;
     $('#sessName').value=Z?.name||'';$('#sessDate').value=Z?.date||''}
   $('#set').innerHTML=Z?Z.items.map((it,i)=>{const S=it.type==='song'?songById(it.id):null;
     return `<div class="item${i===st.itemIdx?' on':''}" data-i="${i}"><span class="ic">${IT[it.type].ic}</span><div class="nm"><b>${esc(itemLabel(it,true))}</b>${(it.type==='sharing'||it.type==='prayer'||it.type==='bible')&&it.name?`<small>${esc(it.name)}</small>`:''}</div>${S?`<a class="sp" href="${esc(spotifyUrl(S))}" target="_blank" rel="noopener" title="Open in Spotify">♫</a>`:''}<button data-up="${i}" aria-label="Move up">↑</button><button data-dn="${i}" aria-label="Move down">↓</button><button data-rm="${i}" aria-label="Remove">✕</button></div>`}).join('')||'<div class="empty">Empty. Add items below.</div>':'';
@@ -1187,13 +1199,13 @@ $('#set').addEventListener('click',e=>{if(e.target.closest('a'))return;const Z=c
     else if(b.dataset.rm!=null){L.splice(i,1);if(st.itemIdx===i)st.itemIdx=-1;else if(st.itemIdx>i)st.itemIdx--}
     save();renderSess();return}
   const it=e.target.closest('.item');if(it){showTab('live');goItem(+it.dataset.i)}});
-$('#sessSel').addEventListener('change',e=>{e.target.blur();db.curSess=e.target.value;st.itemIdx=-1;save();renderSess()});
+$('#sessSel').addEventListener('change',e=>{e.target.blur();leaveSlide();db.curSess=e.target.value;st.itemIdx=-1;save();renderSess()});
 $('#sessName').addEventListener('input',e=>{const Z=curSess();if(!Z)return;Z.name=e.target.value;db.lastGroup=e.target.value;save();renderSess(true);if(st.slide)renderStage()});
 $('#sessName').addEventListener('change',()=>renderSess());
 $('#sessDate').addEventListener('change',e=>{const Z=curSess();if(!Z)return;Z.date=e.target.value;save();renderSess();if(st.slide)renderStage()});
-$('#sessDup').onclick=duplicateSession;$('#sessTpl').onclick=saveTemplate;
-$('#sessNew').onclick=()=>{const prev=curSess();const Z=templateSession([]);if(prev)Z.name=prev.name;db.sessions.push(Z);db.curSess=Z.id;st.itemIdx=-1;save();renderSess();toast('New session created. Add songs with “+ Add” in the library.')};
-$('#sessDel').onclick=()=>{const Z=curSess();if(!Z)return;if(!confirm(`Delete the session “${Z.date} · ${Z.name}”?${FS.dir?' Its file will be moved to the _trash folder.':''} Songs are not deleted.`))return;db.sessions=db.sessions.filter(z=>z!==Z);if(!db.sessions.length)db.sessions.push(templateSession([]));db.curSess=sortedSessions()[0].id;st.itemIdx=-1;save();renderSess()};
+$('#sessDup').onclick=()=>{leaveSlide();duplicateSession()};$('#sessTpl').onclick=saveTemplate;
+$('#sessNew').onclick=()=>{leaveSlide();const prev=curSess();const Z=templateSession([]);if(prev)Z.name=prev.name;while(db.sessions.some(z=>z.date===Z.date&&z.name===Z.name))Z.date=addDays(Z.date,7);db.sessions.push(Z);db.curSess=Z.id;st.itemIdx=-1;save();renderSess();toast(`New session for ${fmtDate(Z.date)}. Your other sessions are still in the dropdown above. Add songs with “+ Add” in the library.`)};
+$('#sessDel').onclick=()=>{const Z=curSess();if(!Z)return;leaveSlide();if(!confirm(`Delete the session “${Z.date} · ${Z.name}”?${FS.dir?' Its file will be moved to the _trash folder.':''} Songs are not deleted.`))return;db.sessions=db.sessions.filter(z=>z!==Z);if(!db.sessions.length)db.sessions.push(templateSession([]));db.curSess=sortedSessions()[0].id;st.itemIdx=-1;save();renderSess()};
 $('#hf').addEventListener('change',e=>{try{localStorage.setItem(LS+'.hf',e.target.checked?'1':'0')}catch(err){}toast(e.target.checked?'Hands-free on (works with audio-file songs)':'Hands-free off')});
 $('#sessAdd').addEventListener('change',e=>{const v=e.target.value;e.target.value='';e.target.blur();if(v)addItem(v)});
 $('#sessShare').onclick=()=>{const Z=curSess();if(!Z)return;const L=[`*${Z.name}*`,fmtDate(Z.date),''];let n=0;
@@ -1213,7 +1225,7 @@ $('#sessPractice').onclick=()=>{const Z=curSess();if(!Z)return;const songs=Z.ite
 /* new song dialog */
 function openNewSong(){['nsTitle','nsArtist','nsSpot','nsLyrics'].forEach(id=>$('#'+id).value='');$('#nsLang').value='en';$('#nsAdd').checked=!!curSess();
   $('#nsWhere').textContent=FS.dir?`Creates a text file in your songs folder “${FS.dir.name}”.`:'Saved in this browser (choose a songs folder in the sidebar to save as files).';
-  updNsFind();$('#nsModal').classList.add('show');setTimeout(()=>$('#nsTitle').focus(),50)}
+  updNsFind();$('#nsModal').classList.add('show');$('#nsTitle').focus()}
 const geniusSearch=S=>'https://genius.com/search?q='+encodeURIComponent(((S?.title||'')+' '+(S?.artist||'')).trim());
 function updNsFind(){const o={title:$('#nsTitle').value,artist:$('#nsArtist').value};$('#nsFind').href=spotifySearch(o);$('#nsGenius').href=geniusSearch(o)}
 async function readClip(){try{return await navigator.clipboard.readText()}catch(e){toast('The browser blocked clipboard access. Click in the box and press Cmd+V (Ctrl+V) instead.');return null}}
@@ -1485,7 +1497,7 @@ setInterval(renderOnb,4000);
   db.songs.forEach(s=>{if(!Array.isArray(s.sections))reparse(s);s.media=Object.assign({type:'none',yt:'',link:'',audioName:''},s.media||{});if(s.media.type==='youtube'){s.media.type='none';s.timeline=[]}if(!s.v2){s.lines=99;s.v2=1}if(!s.v3){s.bgScene=s.bg==='image'?'image':'default';s.bgPal='random';delete s.bg;delete s.motion;s.v3=1}s.media.yt='';s.timeline=s.timeline||[]});save();
   if(!db.defScene)db.defScene='random';if(!db.defPal)db.defPal='random';
   await idbOpen();customBg=await idbGet('bg');fillDefaults();
-  renderLib();setFsStatus();$('#hf').checked=hfOn();updKbd();
+  renderLib();setFsStatus();$('#hf').checked=hfOn();$('#dProg').checked=progOn();updKbd();
   await loadSong(songById(db.last)?db.last:db.songs[0].id);
   const h=await idbGet('dir');
   if(h&&FS.supported!==null){let p='prompt';try{p=h.queryPermission?await h.queryPermission({mode:'readwrite'}):'granted'}catch(e){}

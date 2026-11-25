@@ -9,7 +9,7 @@ A one-page guide for small-group leaders. The app: **https://asuwend1.github.io/
    - Each time the app is opened, Chrome may ask again: click **Reconnect folder**, then **Allow**.
 
 ## Before the meeting
-1. In **Worship session**, click **Duplicate** to copy last week's session (or **+ New**).
+1. In **Worship session**, click **Duplicate** to copy last week's session (or **New session** to start a separate, empty one). To add a slide to the *current* session, use **+ Add a slide or song to this session…**
 2. Set the **date** and add songs from the library with **+ Add**.
 3. Click the **Sharing**, **Prayer** and **Bible reading** items and fill them in. For the Bible reading: type the reference, click **Open on BibleGateway**, copy the passage there, then click **Paste from clipboard**.
 4. Click **Copy run-sheet** and paste it in the group chat, so everyone can practice with the Spotify links.
@@ -26,9 +26,9 @@ A one-page guide for small-group leaders. The app: **https://asuwend1.github.io/
 
 | Key | Does |
 |---|---|
-| Space, →, Page Down | Next line. At the end of a song, next item |
-| ←, Page Up | Previous line |
-| ↓ / ↑ | Next / previous section |
+| Space, ↓, Page Down | Next line. At the end of a song, next item |
+| ↑, Page Up | Previous line |
+| → / ← | Next / previous section |
 | C, 1–9, B | Chorus, verse 1–9, bridge |
 | R / E | Repeat this section / jump to the ending |
 | N / Shift+N | Next / previous session item |
@@ -37,6 +37,8 @@ A one-page guide for small-group leaders. The app: **https://asuwend1.github.io/
 | Esc | Leave a text field so the keys work again |
 
 A presentation clicker works too (it sends Page Up / Page Down).
+
+The dots at the bottom of the screen show where you are in the song: gold is the current section.
 
 ## No one to play guitar?
 Give songs an **audio file** (an instrumental or "minus one" track) in **Edit song → Music**. Press **S**, tap **Space** at the start of each line once, and press **S** again. After that, the lyrics follow the music by themselves. Turn on **Hands-free** in the session panel and the music starts automatically, then moves on to the next item when it ends.

@@ -41,7 +41,10 @@ async def new_page(browser):
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.on("dialog", lambda d: asyncio.ensure_future(d.accept()))
-    await pg.goto(BASE); await pg.wait_for_timeout(600); await pg.keyboard.press("Escape")
+    await pg.goto(BASE)
+    await pg.wait_for_function("document.querySelectorAll('#lib .item').length>0 && document.querySelector('#songName').textContent.length>0")
+    await pg.wait_for_timeout(300)
+    await pg.evaluate("document.querySelector('#help').classList.remove('show')")
     return ctx, pg, errs
 
 
@@ -49,7 +52,9 @@ async def create_song(pg, title, lyrics, add=False):
     await pg.click("#btnNew"); await pg.fill("#nsTitle", title); await pg.fill("#nsLyrics", lyrics)
     if not add:
         await pg.uncheck("#nsAdd")
-    await pg.click("#nsCreate"); await pg.wait_for_timeout(400)
+    await pg.click("#nsCreate")
+    await pg.wait_for_function("t=>document.querySelector('#songName').textContent.startsWith(t) && !document.querySelector('#nsModal').classList.contains('show')", arg=title)
+    await pg.wait_for_timeout(300)
 
 
 async def cur_line(pg):
@@ -76,7 +81,7 @@ async def test_navigation(browser):
     ctx, pg, errs = await new_page(browser)
     await create_song(pg, "Nav", "[Verse 1]\nv1a\nv1b\n[Chorus]\nca\ncb\n[Verse 2]\nv2a\nv2b\n[Chorus]")
     seq = []
-    for k in ["Space", "Space", "Space", "ArrowDown", "ArrowUp", "c", "ArrowLeft", "r", "e"]:
+    for k in ["Space", "ArrowDown", "Space", "ArrowRight", "ArrowLeft", "c", "ArrowUp", "r", "e"]:
         await pg.keyboard.press(k); seq.append(await cur_line(pg))
     expect = ["Verse 1 > v1a", "Verse 1 > v1b", "Chorus > ca", "Verse 2 > v2a", "Chorus > ca", "Chorus > ca", "Verse 2 > v2b", "Verse 2 > v2a", "Chorus > ca"]
     check("manual line/section/jump keys", seq == expect, f"{seq}")
@@ -88,10 +93,15 @@ async def test_navigation(browser):
     await pg.keyboard.press("s"); await pg.wait_for_timeout(200)
     check("timing recorded", "10 timing cues" in await pg.inner_text("#status"), await pg.inner_text("#status"))
     await pg.click("#clkReset"); await pg.keyboard.press("Enter"); await pg.wait_for_timeout(1300)
-    check("auto-follow moves with the clock", (await cur_line(pg)).startswith("Verse 1") or (await cur_line(pg)).startswith("Chorus"), await cur_line(pg))
-    await pg.keyboard.press("ArrowDown"); await pg.wait_for_timeout(250); a = await cur_line(pg)
-    await pg.keyboard.press("ArrowDown"); await pg.wait_for_timeout(250); b = await cur_line(pg)
-    check("timed section jump changes section", a.split(" > ")[0] != b.split(" > ")[0], f"{a} | {b}")
+    cl = await cur_line(pg)
+    check("auto-follow moves with the clock", " > " in cl and not cl.endswith("> -"), cl)
+    await pg.keyboard.press("Enter"); await pg.wait_for_timeout(200)  # pause so time stands still
+    await pg.keyboard.press("1"); await pg.wait_for_timeout(300); a = await cur_line(pg)
+    await pg.keyboard.press("ArrowRight"); await pg.wait_for_timeout(300); b = await cur_line(pg)
+    await pg.keyboard.press("ArrowRight"); await pg.wait_for_timeout(300); c = await cur_line(pg)
+    check("timed section jumps follow the recording", (a, b, c) == ("Verse 1 > v1a", "Chorus > ca", "Verse 2 > v2a"), f"{a} | {b} | {c}")
+    dots = await pg.evaluate("[...document.querySelectorAll('#preview .prog i')].map(i=>i.className||'-').join(' ')")
+    check("progress dots show position in song", "c" in dots.split() and len(dots.split()) >= 3, dots)
     check("navigation: no page errors", not errs, str(errs)); await ctx.close()
 
 
@@ -122,6 +132,8 @@ async def test_sessions(browser):
     items = await pg.inner_text("#set")
     check("duplicate keeps songs, clears sharing", "Give Thanks" in items and "Member A" not in items, items)
     await pg.click("#sessTpl"); await pg.click("#sessNew"); await pg.wait_for_timeout(200)
+    labels = await pg.evaluate("[...document.querySelectorAll('#sessSel option')].map(o=>o.textContent)")
+    check("session labels are distinct and show song counts", len(set(labels)) == len(labels) and all(" song" in l for l in labels), str(labels))
     check("new session follows saved order", "Bible:" in await pg.inner_text("#set") and "Choose a song" in await pg.inner_text("#set"))
     await pg.click('#lib .item:has-text("Amazing Grace") button'); await pg.wait_for_timeout(200)
     check("+ Add fills the first empty song slot", "Amazing Grace" in await pg.inner_text("#set"))
