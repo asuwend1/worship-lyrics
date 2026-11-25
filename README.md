@@ -26,6 +26,7 @@ This repository and the website contain only the app's code: no songs, names, pr
 The whole app is `index.html`: plain HTML, CSS and JavaScript with no build step.
 
 - **Tests:** `pip install playwright && python -m playwright install chromium`, then `python tests/run_tests.py`. The tests drive the app in a headless browser, using made-up data only.
+- **Offline / install:** `manifest.webmanifest`, `sw.js` (network-first cache) and `icons/` make the site installable and usable offline.
 - **Publishing:** every push runs the tests on GitHub Actions, and the site is only published if they pass.
   - `main` is published to https://asuwend1.github.io/worship-lyrics/
   - `preview` is published to https://asuwend1.github.io/worship-lyrics/preview/ so a change can be tried before it goes to `main`. The preview shares browser storage with the main site, so try risky changes with a test songs folder.

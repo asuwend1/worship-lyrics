@@ -185,6 +185,30 @@ async def test_pacing_and_handsfree(browser, tmp):
     check("pacing: no page errors", not errs, str(errs)); await ctx.close()
 
 
+async def test_check_and_pwa(browser):
+    ctx, pg, errs = await new_page(browser)
+    long = "This is a very long lyric line that will certainly wrap on the television, friends"
+    await create_song(pg, "Check", "Check Lyrics\nYou might also like\n[Verse 1]\n" + long + "\nshort\n[Chorus]\nc1\n[Bridge]\nb1")
+    await pg.wait_for_timeout(400)
+    check("new song with problems opens the Edit tab", not await pg.is_hidden("#edit"))
+    txt = await pg.inner_text("#eCheck")
+    check("lyrics check flags leftover text and long line", "Leftover website text" in txt and "Long line" in txt, txt)
+    check("section previews drawn", await pg.locator("#eThumbs .stage").count() >= 2)
+    await pg.click('#eCheck li:has-text("Long line") button'); await pg.wait_for_timeout(500)
+    lyr = await pg.input_value("#eLyrics")
+    check("split long line into two", long not in lyr and "certainly" in lyr, lyr)
+    await pg.click('#eCheck li:has-text("You might also like") button'); await pg.wait_for_timeout(500)
+    check("remove leftover text", "You might also like" not in await pg.input_value("#eLyrics"))
+    # onboarding + installable app files
+    check("getting started checklist shown", not await pg.is_hidden("#onb") and "/" in await pg.inner_text("#onbCount"))
+    man = await pg.evaluate("fetch('manifest.webmanifest').then(r=>r.json())")
+    check("manifest served", man.get("name") == "Worship Lyrics" and len(man.get("icons", [])) >= 2)
+    await pg.wait_for_timeout(1500)
+    sw = await pg.evaluate("navigator.serviceWorker.getRegistration().then(r=>!!r)")
+    check("offline service worker registered", sw)
+    check("check/pwa: no page errors", not errs, str(errs)); await ctx.close()
+
+
 async def main():
     server = subprocess.Popen([sys.executable, "-m", "http.server", str(PORT)], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(1)
@@ -200,6 +224,7 @@ async def main():
                     await fn(browser)
                 await test_folder(browser, tmp)
                 await test_pacing_and_handsfree(browser, tmp)
+                await test_check_and_pwa(browser)
             await browser.close()
     finally:
         server.terminate()

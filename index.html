@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Worship Lyrics</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#111318">
 <style>
 /* VOICE: calm, dim living-room console; the TV stage is the hero
    IDEA: a church projection booth — preview monitor, cue list, transport
@@ -120,6 +124,20 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
 .upnext b{color:var(--acc);font-weight:600}
 .upnext .clk{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--mute)}
 .btnlink{display:inline-flex;align-items:center;min-height:38px;padding:7px 12px;border-radius:8px;background:var(--acc);color:#1a1400;font-weight:600;text-decoration:none}
+.onb{background:linear-gradient(160deg,rgba(242,193,78,.12),rgba(242,193,78,.03));border:1px solid rgba(242,193,78,.35);border-radius:10px;padding:10px 12px}
+.onb ol{margin:4px 0 6px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.onb li{display:flex;gap:8px;align-items:flex-start}
+.onb li .ck{flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--mute);display:inline-flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px}
+.onb li.done{color:var(--mute)}.onb li.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.onb li>span:nth-child(2){flex:1;min-width:0}
+.onb li button{min-height:26px;padding:0 8px;font-size:12px;flex:none;white-space:nowrap}
+.chk{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.chk h3{margin:0 0 6px;font-size:14px}.chk ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.chk li{display:flex;gap:8px;align-items:flex-start}.chk li span{flex:1}.chk li button{min-height:26px;padding:0 8px;font-size:12px}
+.chk .ok{color:#9be3a6}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
+.thumbs figure{margin:0}.thumbs figcaption{font-size:11px;color:var(--mute);margin-top:3px}
+.thumbs .stage{border-radius:6px}
 .item a.sp{font-size:12px;text-decoration:none;padding:0 4px}
 .sessgrid{display:grid;grid-template-columns:minmax(0,1fr) 140px;gap:6px;margin:6px 0}
 @media(max-width:1100px){.cols{grid-template-columns:minmax(0,1fr)}.edgrid{grid-template-columns:minmax(0,1fr)}}
@@ -199,13 +217,19 @@ kbd{background:#0e1014;border:1px solid var(--line);border-bottom-width:2px;bord
 </head>
 <body>
 <header class="top">
-  <h1>Worship <span>Lyrics</span> <small style="font-size:12px;color:var(--mute);font-weight:400" title="App version">v2.0.0</small></h1>
+  <h1>Worship <span>Lyrics</span> <small style="font-size:12px;color:var(--mute);font-weight:400" title="App version">v2.1.0</small></h1>
   <button id="btnTV" title="Open a separate window to drag onto the TV">Open TV window</button>
   <button id="btnFS" title="Full screen on this screen (F)">Present here <kbd>F</kbd></button>
+  <button id="btnInstall" hidden title="Install as an app on this computer">Install app</button>
   <button id="btnHelp">Help <kbd>?</kbd></button>
 </header>
 <div class="app">
   <aside>
+    <section id="onb" class="onb" hidden>
+      <h2>Getting started <span id="onbCount"></span> <button id="onbHide" title="Hide this checklist">Hide</button></h2>
+      <ol id="onbList"></ol>
+      <p class="hint"><a href="https://github.com/asuwend1/worship-lyrics/blob/main/GUIDE.md" target="_blank" rel="noopener">Leader guide ↗</a> · press <kbd>?</kbd> for help</p>
+    </section>
     <section>
       <h2>Song library <button id="btnNew" class="pri">+ New song</button></h2>
       <input type="search" id="q" placeholder="Search title or artist" aria-label="Search songs">
@@ -328,6 +352,7 @@ Without labels, blank lines split the parts, and a part that comes back is treat
         <div>
           <label>Detected sections</label>
           <table class="struct" id="eStruct"></table>
+          <div class="chk" id="eCheck"></div>
           <label for="eOrder">Song order (codes, separated by spaces; <b>C*2</b> = chorus twice)</label>
           <div class="row"><input type="text" id="eOrder" style="flex:1"><button id="eOrderReset">Reset</button></div>
           <div class="err" id="eOrderErr"></div>
@@ -360,7 +385,7 @@ Without labels, blank lines split the parts, and a part that comes back is treat
 </div>
 
 <div class="modal" id="help"><div class="card">
-  <div class="row" style="justify-content:space-between"><h2 style="font-size:18px;color:var(--ink);margin:0">How to use it <small style="font-weight:400;color:var(--mute)">· version 2.0.0</small></h2><button id="helpClose">Close <kbd>Esc</kbd></button></div>
+  <div class="row" style="justify-content:space-between"><h2 style="font-size:18px;color:var(--ink);margin:0">How to use it <small style="font-weight:400;color:var(--mute)">· version 2.1.0</small></h2><button id="helpClose">Close <kbd>Esc</kbd></button></div>
   <h3>1 · Add a song</h3>
   <ol><li><b>+ New song</b>, then paste the lyrics into the <b>Edit song</b> tab. Sections like Verse, Chorus, Bait and Reff are detected automatically.</li>
   <li>Check the <b>song order</b>. Genius usually lists the full order already; fix it if your group sings it differently.</li>
@@ -369,6 +394,8 @@ Without labels, blank lines split the parts, and a part that comes back is treat
   <ol><li>On the <b>Live</b> tab press <b>Record timing</b> (<kbd>S</kbd>). The music starts from the beginning.</li>
   <li>Tap <kbd>Space</kbd> at the start of every line. If the recording repeats a chorus, press <kbd>C</kbd>; for a section again, <kbd>R</kbd>; for an instrumental break, <kbd>K</kbd>. Made a mistake? <kbd>←</kbd> undoes the last tap.</li>
   <li>Press <kbd>S</kbd> at the end. From now on the lyrics move by themselves whenever that track plays. If they feel early or late, nudge with <kbd>[</kbd> <kbd>]</kbd>.</li></ol>
+  <h3>Install and offline use</h3>
+  <p>Click <b>Install app</b> (top right) or the install icon in Chrome's address bar. The app then opens in its own window from your Dock or Start menu, and it keeps working without Wi-Fi once it has been opened online. Leaders new to the app: see the <a href="https://github.com/asuwend1/worship-lyrics/blob/main/GUIDE.md" target="_blank" rel="noopener">Leader guide</a>.</p>
   <h3>Where songs are saved</h3>
   <p>Best: click <b>Choose songs folder…</b> in the sidebar and pick a folder in Google Drive, Dropbox or iCloud Drive. Each song becomes a plain text file (for example <code>Give Thanks - Don Moen.txt</code>) that anyone can open and edit. Timing, song order and backgrounds go in <code>_worship-app.json</code>, and audio in an <code>audio</code> subfolder. Point the app at the same synced folder on another laptop and everything is there.</p>
   <p>To add a song without the app, save a text file in the folder like this (the top lines are optional):</p>
@@ -702,7 +729,7 @@ function fitText(root){const c=root.querySelector('.ct');let f=1;root.style.setP
   const max=root.clientHeight*0.78;for(let i=0;i<14&&H()>max;i++){f*=0.92;root.style.setProperty('--fit',f)}}
 window.addEventListener('resize',()=>renderStage());
 function renderStage(){updUpNext();const m=stageModel();paint($('#preview'),m);if(tv&&!tv.closed){try{paint(tv.document.getElementById('stage'),m)}catch(e){}}}
-function openTV(){
+function openTV(){flag('tvUsed',true);
   tv=window.open('','worshipTV','width=1280,height=720');
   if(!tv){toast('The browser blocked the window. Allow pop-ups for this page.');return}
   const d=tv.document;
@@ -875,7 +902,7 @@ document.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout((
 function toggleFollow(){st.follow=!st.follow;if(!st.follow)syncPosFromView();else st.tl=-2;render()}
 function nudge(d){const S=st.song;S.offset=Math.round(((S.offset||0)+d)*100)/100;save();updTransport()}
 function fsize(d){const S=st.song;S.fs=Math.min(1.5,Math.max(0.6,Math.round(((S.fs||1)+d)*100)/100));save();renderStage();if(!$('#edit').hidden)$('#eFs').value=S.fs}
-function presentHere(){const w=$('#stagewrap');if(document.fullscreenElement)document.exitFullscreen();else w.requestFullscreen&&w.requestFullscreen().catch(()=>toast('Full screen was refused'))}
+function presentHere(){flag('tvUsed',true);const w=$('#stagewrap');if(document.fullscreenElement)document.exitFullscreen();else w.requestFullscreen&&w.requestFullscreen().catch(()=>toast('Full screen was refused'))}
 
 
 /* ---------- load song ---------- */
@@ -931,8 +958,40 @@ function fillEdit(){
   $('#eFs').value=S.fs||1;$('#eLines').value=String([4,6,99].includes(S.lines)?S.lines:99);
   showMediaFields();fillStruct();fillBgEdit();fileHint();
 }
+const JUNK_LINE=/(\blyrics$|embed$|you might also like|contributors?|translations?|read more|https?:\/\/|\[\?\]|^see .* live|get tickets)/i;
+function songIssues(S){
+  const out=[];if(!S.sections.length){out.push({t:'No lyrics yet: paste them on the left.'});return out}
+  const raw=String(S.lyrics||'').split('\n').map(x=>x.trim());
+  const junk=[...new Set(raw.filter(x=>x&&JUNK_LINE.test(x)&&!/^\[.*\]$/.test(x)))];
+  junk.forEach(x=>out.push({t:`Leftover website text: “${x.slice(0,60)}”`,act:'rmline',arg:x,btn:'Remove'}));
+  const long=new Map();S.sections.forEach(sec=>sec.lines.forEach(l=>{if(l.length>48&&!long.has(l))long.set(l,sec.name)}));
+  long.forEach((name,l)=>out.push({t:`Long line in ${name} (${l.length} characters) may wrap on the TV: “${l.slice(0,50)}…”`,act:'split',arg:l,btn:'Split in two'}));
+  const big=S.sections.filter(sec=>sec.lines.length>8);
+  if(big.length&&!(S.lines<99))out.push({t:`${big.map(x=>x.name).join(', ')} ${big.length>1?'have':'has'} more than 8 lines, so the text will be small.`,act:'pages',btn:'Show in pages of 6'});
+  const used=new Set(S.order||[]);S.sections.forEach((sec,i)=>{if(!used.has(i))out.push({t:`${sec.name} isn't in the song order, so it won't be shown.`,act:'addorder',arg:i,btn:'Add at end'})});
+  return out}
+function splitLine(l){const mid=l.length/2;let best=-1,bd=1e9;
+  for(let i=1;i<l.length-1;i++){const c=l[i];const sc=/[,;:–—]/.test(c)?0:c===' '?6:null;if(sc===null)continue;const pos=c===' '?i:i+1;const d=Math.abs(pos-mid)+sc;if(d<bd){bd=d;best=pos}}
+  if(best<0)return[l];return[l.slice(0,best).trim(),l.slice(best).trim()]}
+function fixIssue(act,arg){const S=st.song;if(!S)return;
+  if(act==='rmline'){S.lyrics=String(S.lyrics).split('\n').filter(x=>x.trim()!==arg).join('\n')}
+  else if(act==='split'){const [a,b]=splitLine(arg);S.lyrics=String(S.lyrics).split('\n').map(x=>x.trim()===arg?a+'\n'+b:x).join('\n')}
+  else if(act==='pages'){S.lines=6;$('#eLines').value='6';changed();fillCheck();return}
+  else if(act==='addorder'){S.order.push(+arg);recode(S);$('#eOrder').value=S.orderText;changed(true);fillCheck();return}
+  reparse(S);$('#eLyrics').value=S.lyrics;$('#eOrder').value=S.orderText;fillStruct();changed(true);toast('Fixed')}
+function fillCheck(){const S=st.song,el=$('#eCheck');if(!S||!el)return;const iss=songIssues(S);
+  el.innerHTML=`<h3>Lyrics check</h3>`+(iss.length?`<ul>${iss.map((x,i)=>`<li><span>⚠️ ${esc(x.t)}</span>${x.act?`<button data-fix="${i}">${esc(x.btn)}</button>`:''}</li>`).join('')}</ul>`:'<p class="ok" style="margin:0">✓ Looks good. Every section fits on the screen.</p>')
+    +(S.sections.length?`<p class="hint" style="margin:10px 0 0">How each section will look on the TV:</p><div class="thumbs" id="eThumbs"></div>`:'');
+  el._iss=iss;const T=$('#eThumbs');if(!T)return;const seen=[];(S.order||[]).forEach(i=>{if(!seen.includes(i))seen.push(i)});
+  seen.forEach(i=>{const sec=S.sections[i];if(!sec)return;const fig=document.createElement('figure');const box=document.createElement('div');box.className='stage';fig.appendChild(box);
+    const cap=document.createElement('figcaption');cap.textContent=sec.name+(sec.lines.length>8&&S.lines<99?' (first page)':'');fig.appendChild(cap);T.appendChild(fig);
+    const per=S.lines&&S.lines<99?S.lines:sec.lines.length;const pages=Math.ceil(sec.lines.length/per),size=Math.ceil(sec.lines.length/pages);const N=Math.min(size,sec.lines.length);
+    const html=`<div class="sec">${esc(sec.name)}</div><div class="ct">${sec.lines.slice(0,N).map((l,k)=>`<div class="ln${k===0?' cur':''}"><span>${esc(l)}</span></div>`).join('')}</div>`;
+    paint(box,Object.assign({cls:'stage',html,fs:S.fs||1,n:N},bgModel(st.bg)))})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-fix]');if(!b)return;const it=$('#eCheck')._iss?.[+b.dataset.fix];if(it)fixIssue(it.act,it.arg)});
 function fillStruct(){
   const S=st.song;const opts=[['verse','Verse / Bait'],['chorus','Chorus / Reff'],['pre','Pre-chorus'],['post','Post-chorus'],['bridge','Bridge'],['intro','Intro'],['end','Ending'],['tag','Tag'],['inst','Instrumental'],['other','Other']];
+  setTimeout(fillCheck,0);
   $('#eStruct').innerHTML=S.sections.length?'<tr><th>Code</th><th>Name</th><th>Type</th><th>Lines</th></tr>'+S.sections.map((x,i)=>`<tr><td class="c">${esc(x.code)}</td><td>${esc(x.name)}</td><td><select data-ty="${i}">${opts.map(([v,n])=>`<option value="${v}"${v===x.type?' selected':''}>${n}</option>`).join('')}</select></td><td>${x.lines.length}</td></tr>`).join(''):'<tr><td class="empty">Paste lyrics to see sections.</td></tr>';
 }
 function showMediaFields(){const t=st.song.media.type;$('#eMediaAudio').hidden=t!=='audio';$('#eMediaClock').hidden=t!=='clock'}
@@ -1167,7 +1226,7 @@ $('#nsCreate').onclick=async()=>{const title=$('#nsTitle').value.trim();if(!titl
   const S=newSong({title,artist:$('#nsArtist').value.trim(),lang:$('#nsLang').value,spotify:$('#nsSpot').value.trim(),lyrics:$('#nsLyrics').value});reparse(S);db.songs.push(S);
   if($('#nsAdd').checked&&curSess())addItem('song',S.id);
   $('#nsModal').classList.remove('show');save();if(FS.dir)await flushFolder();await loadSong(S.id);
-  toast(FS.dir&&FS.files[S.id]?`Created “${FS.files[S.id].name}” in your songs folder`:'Song created')};
+  const iss=songIssues(S).filter(x=>x.act);if(iss.length){showTab('edit');toast(`Song created. The lyrics check has ${iss.length} suggestion${iss.length===1?'':'s'}.`)}else toast(FS.dir&&FS.files[S.id]?`Created “${FS.files[S.id].name}” in your songs folder`:'Song created')};
 /* session text files */
 function fileBase(S){return FS.files[S.id]?FS.files[S.id].name.replace(/\.txt$/i,''):safeName(S.title+(S.artist?' - '+S.artist:''))}
 function resolveRef(ref){const r=String(ref||'').replace(/\.txt$/i,'').trim().toLowerCase();if(!r)return null;
@@ -1393,6 +1452,30 @@ $('#fsBtns').addEventListener('click',e=>{const a=e.target.closest('[data-act]')
   else if(a==='reload'){FS.timer?flushFolder().then(()=>connectDir(FS.dir)):connectDir(FS.dir)}else if(a==='copy')copyBrowserSongs(FS.copyable,false)});
 window.__wlConnect=connectDir;
 
+/* ---------- getting started + install ---------- */
+const flag=(k,v)=>{try{if(v!==undefined)localStorage.setItem(LS+'.f.'+k,v?'1':'0');return localStorage.getItem(LS+'.f.'+k)==='1'}catch(e){return false}};
+function renderOnb(){const el=$('#onb');if(!el)return;if(flag('onbHidden')){el.hidden=true;return}
+  const Z=curSess();const steps=[
+    {t:'Choose your songs folder (e.g. a shared Google Drive folder)',done:!!FS.dir,btn:'Choose',act:()=>chooseFolder(),show:FS.supported},
+    {t:'Add a song: + New song, then paste lyrics from Genius',done:db.songs.some(S=>S.sections.length&&!/public domain/i.test(S.artist)),btn:'New song',act:()=>openNewSong()},
+    {t:'Build tonight\'s session: add songs, Sharing and Prayer details',done:!!Z&&Z.items.some(it=>it.type==='song'&&it.id),btn:null},
+    {t:'Put it on the TV: Open TV window (or F for full screen)',done:flag('tvUsed'),btn:'Open TV',act:()=>openTV()},
+    {t:'Optional: record timing for a song with an audio track (S)',done:db.songs.some(S=>S.timeline&&S.timeline.length),btn:null},
+    {t:'Optional: install the app (works without Wi-Fi)',done:flag('installed')||matchMedia('(display-mode: standalone)').matches,btn:installEvt?'Install':null,act:()=>doInstall()}
+  ].filter(x=>x.show!==false);
+  const n=steps.filter(x=>x.done).length;el.hidden=false;$('#onbCount').textContent=`${n}/${steps.length}`;
+  $('#onbList').innerHTML=steps.map((x,i)=>`<li class="${x.done?'done':''}"><span class="ck">${x.done?'✓':i+1}</span><span>${esc(x.t)}</span>${!x.done&&x.btn?`<button data-onb="${i}">${esc(x.btn)}</button>`:''}</li>`).join('');
+  $('#onbList')._steps=steps}
+$('#onbList').addEventListener('click',e=>{const b=e.target.closest('[data-onb]');if(!b)return;const s=$('#onbList')._steps[+b.dataset.onb];if(s&&s.act)s.act()});
+$('#onbHide').onclick=()=>{flag('onbHidden',true);renderOnb();toast('Checklist hidden. The Leader guide link is in Help.')};
+let installEvt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;$('#btnInstall').hidden=false;renderOnb()});
+window.addEventListener('appinstalled',()=>{flag('installed',true);$('#btnInstall').hidden=true;installEvt=null;renderOnb();toast('Installed. Open “Worship Lyrics” from your apps or Dock.')});
+async function doInstall(){if(!installEvt){toast('Use the install icon in Chrome\'s address bar, or the ⋮ menu → Cast, save and share → Install');return}installEvt.prompt();try{await installEvt.userChoice}catch(e){}installEvt=null;$('#btnInstall').hidden=true;renderOnb()}
+$('#btnInstall').onclick=doInstall;
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+setInterval(renderOnb,4000);
+
 /* ---------- boot ---------- */
 (async()=>{
   try{const j=JSON.parse(localStorage.getItem(LS)||'null');if(j&&Array.isArray(j.songs)&&j.songs.length)db=Object.assign(db,j)}catch(e){}
@@ -1407,6 +1490,7 @@ window.__wlConnect=connectDir;
   const h=await idbGet('dir');
   if(h&&FS.supported!==null){let p='prompt';try{p=h.queryPermission?await h.queryPermission({mode:'readwrite'}):'granted'}catch(e){}
     if(p==='granted')await connectDir(h);else{FS.pending=h;setFsStatus()}}
+  renderOnb();
   if(!localStorage.getItem(LS+'.seenHelp')){$('#help').classList.add('show');try{localStorage.setItem(LS+'.seenHelp','1')}catch(e){}}
 })();
 }

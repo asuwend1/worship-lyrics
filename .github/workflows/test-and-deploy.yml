@@ -56,13 +56,15 @@ jobs:
           path: preview
       - name: Assemble site
         run: |
-          mkdir -p _site
-          cp main/index.html _site/index.html
+          copy_site () {  # $1 = source checkout, $2 = destination folder
+            mkdir -p "$2"
+            for f in index.html manifest.webmanifest sw.js; do [ -f "$1/$f" ] && cp "$1/$f" "$2/"; done
+            [ -d "$1/icons" ] && cp -r "$1/icons" "$2/"
+            return 0
+          }
+          copy_site main _site
           touch _site/.nojekyll
-          if [ -f preview/index.html ]; then
-            mkdir -p _site/preview
-            cp preview/index.html _site/preview/index.html
-          fi
+          if [ -f preview/index.html ]; then copy_site preview _site/preview; fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
